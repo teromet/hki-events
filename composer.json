@@ -1,0 +1,9 @@
+{
+    "name": "teromet/hki-events",
+    "type": "project",
+    "description": "",
+    "license": "GPL-3.0+",
+    "require-dev": {
+        "phpunit/phpunit": "^10"
+    }
+}
