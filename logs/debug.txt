@@ -53,3 +53,5 @@
 2023-10-26 09:51 - Cron event finished
 2023-10-26 09:52 - Cron event finished
 2023-10-26 09:53 - Cron event finished
+2023-12-20 11:44 - query: https://api.hel.fi/linkedevents/v1/event/?is_free=true&keyword=yso%3Ap27962&start=today
+2023-12-20 11:59 - query: https://api.hel.fi/linkedevents/v1/event/?is_free=true&keyword=yso%3Ap27962&start=today

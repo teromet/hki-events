@@ -4,6 +4,7 @@ namespace HkiEvents;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
+
 /**
  * HE_API
  *
@@ -12,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 class HE_API {
 
-    const HE_API_URL = 'https://api.hel.fi/linkedevents/v1/event/?start=today&is_free=true&keyword=yso:p27962';
+    const HE_API_URL = 'https://api.hel.fi/linkedevents/v1/event/?';
 
 
     /**
@@ -23,7 +24,14 @@ class HE_API {
      */
     public function get_events() {
 
-        $response = wp_remote_get( self::HE_API_URL, ['timeout' => 10] );
+        // API Params
+        $api_params = array( 
+            'is_free' => 'true',
+            'keyword' => 'yso:p27962',
+            'start' => get_option( 'hki_events_api_start_date' ) ? get_option( 'hki_events_api_start_date' ) : 'today'
+        );
+
+        $response = wp_remote_get( self::HE_API_URL.http_build_query($api_params), ['timeout' => 10] );
         $events = array();
 
         if( is_wp_error( $response ) ) {

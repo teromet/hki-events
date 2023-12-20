@@ -37,7 +37,7 @@ class HE_Event {
      */
     public function save() {
 
-        if ( ! is_admin() ) {
+        if ( ! function_exists( 'post_exists' ) ) {
             require_once( ABSPATH . 'wp-admin/includes/post.php' );
         }
 

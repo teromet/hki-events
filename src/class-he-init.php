@@ -7,6 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 use HkiEvents\HE_API as Api;
 use HkiEvents\HE_CPT as CPT;
 use HkiEvents\HE_Event as Event;
+use HkiEvents\HE_Settings_Page as Settings_Page;
 
 class HE_Init {
 
@@ -30,6 +31,14 @@ class HE_Init {
 
         // Add shortcode
         add_shortcode( 'hki_events', array( $this, 'shortcode' ) );
+
+        // Add menu page
+        $settings_page = new Settings_Page();
+
+        // Test importing
+        if( isset($_GET["hki_action"]) && trim($_GET["hki_action"]) == 'import_events') {
+            $this->handle_cron();
+        }
 
     }
 
