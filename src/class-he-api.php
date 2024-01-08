@@ -5,10 +5,13 @@ namespace HkiEvents;
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 
+use HkiEvents\HE_Utils as Utils;
+
+
 /**
  * HE_API
  *
- * Provides an access to Helsinki Events API
+ * Provides an access to Helsinki Linked Events API
  *
  */
 class HE_API {
@@ -22,16 +25,11 @@ class HE_API {
      * @return array|WP_Error
      * 
      */
-    public function get_events() {
+    private function get_events( $params ) {
 
-        // API Params
-        $api_params = array( 
-            'is_free' => 'true',
-            'keyword' => 'yso:p27962',
-            'start' => get_option( 'hki_events_api_start_date' ) ? get_option( 'hki_events_api_start_date' ) : 'today'
-        );
+        Utils::log( 'query-log', 'query: '.self::HE_API_URL.http_build_query($params) );
 
-        $response = wp_remote_get( self::HE_API_URL.http_build_query($api_params), ['timeout' => 10] );
+        $response = wp_remote_get( self::HE_API_URL.http_build_query($params), ['timeout' => 10] );
         $events = array();
 
         if( is_wp_error( $response ) ) {
@@ -44,6 +42,50 @@ class HE_API {
         if( !empty( $response_body ) && !empty( $response_body->data ) ) {
             $events = $response_body->data;
         }
+
+        return $events;
+
+    }
+
+    /**
+     * Get upcoming events. Return array of events or WP_Error
+     *
+     * @return array|WP_Error
+     * 
+     */
+    public function get_upcoming_events() {
+
+        // API Params
+        $params = array( 
+            'is_free' => 'true',
+            'keyword' => 'yso:p27962',
+            'hide_recurring_children' => 'true',
+            'start' => get_option( 'hki_events_api_start_date' ) ? get_option( 'hki_events_api_start_date' ) : 'today'
+        );
+
+        $events = $this->get_events( $params );
+
+        return $events;
+
+    }
+
+    /**
+     * Get all upcoming subevents for specific superevent. Return array of events or WP_Error
+     * 
+     * @param string $event_id
+     * 
+     * @return array|WP_Error
+     * 
+     */
+    public function get_sub_events( $event_id ) {
+
+        // API Params
+        $params = array( 
+            'super_event' => $event_id,
+            'start' => get_option( 'hki_events_api_start_date' ) ? get_option( 'hki_events_api_start_date' ) : 'today'
+        );
+
+        $events = $this->get_events( $params );
 
         return $events;
 

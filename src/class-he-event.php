@@ -19,6 +19,8 @@ class HE_Event {
     private $end_time;
     private $image_url;
     private $description;
+    private $recurring;
+    private $dates;
 
     function __construct( $args ) {
 
@@ -27,6 +29,8 @@ class HE_Event {
         $this->end_time = $args['end_time'];
         $this->image_url = $args['image_url'];
         $this->description = $args['description'];
+        $this->recurring = $args['recurring'];
+        $this->dates = $args['dates'];
 
     }
 
@@ -56,16 +60,19 @@ class HE_Event {
         if( !is_wp_error( $post_id ) && $post_id > 0 ) {
 
             $this->add_thumbnail( $post_id );
-
-            add_post_meta( $post_id, 'hki_event_start_time', $this->start_time );
-            add_post_meta( $post_id, 'hki_event_end_time', $this->end_time );
-            
+            $this->add_event_dates( $post_id );
+        
         }
 
         return $post_id;
 
     }
 
+    /**
+     * Add post thumbnail from url
+     * 
+     * @param int $post_id
+     */
     private function add_thumbnail( $post_id ) {
 
         $current_image_url = get_post_meta( $post_id, 'hki_event_image_url', true );
@@ -75,6 +82,30 @@ class HE_Event {
         }
 
         add_post_meta( $post_id, 'hki_event_image_url', $this->image_url );
+
+    }
+
+    /**
+     * Add or update event dates
+     * 
+     * @param int $post_id
+     */
+    private function add_event_dates ( $post_id ) {
+
+        $date_formatted = date( 'j.n.Y', strtotime( $this->start_time ) );
+
+        if ( $this->recurring && !empty( $this->dates ) ) {
+
+            $date_formatted = implode(', ', array_map(
+                function( $v ) { 
+                    return date( 'j.n.Y', strtotime( $v ) );
+                }, array_values($this->dates) )
+            );
+
+        }
+
+        update_field( 'hki_event_start_time', $this->start_time, $post_id );
+        update_field( 'hki_event_dates', $date_formatted, $post_id );
 
     }
 
