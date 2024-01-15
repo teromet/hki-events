@@ -88,6 +88,7 @@ class HE_Init {
                 if( !$event->start_time ) {
                     continue;
                 }
+                
                 $this->create_event( $event );
             }
         }

@@ -90,7 +90,7 @@ class HE_Event {
      * 
      * @param int $post_id
      */
-    private function add_event_dates ( $post_id ) {
+    private function add_event_dates( $post_id ) {
 
         $date_formatted = date( 'j.n.Y', strtotime( $this->start_time ) );
 
@@ -105,6 +105,7 @@ class HE_Event {
         }
 
         update_field( 'hki_event_start_time', $this->start_time, $post_id );
+        update_field( 'hki_event_end_time', $this->end_time, $post_id );
         update_field( 'hki_event_dates', $date_formatted, $post_id );
 
     }

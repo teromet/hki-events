@@ -58,11 +58,11 @@ class HE_Utils {
         $unique_file_name = wp_unique_filename( $upload_dir['path'], $image_name ); // Generate unique name
         $filename         = basename( $unique_file_name ); // Create image file name
 
-        // Early exit if no data
-        if ( !$image_data ) {
+        // Early exit if no data or attachment with this name already exists
+        if( !$image_data || attachment_url_to_postid( $upload_dir['url'].'/'.$image_name ) === $post_id ) {
             return;
         }
-        
+
         // Check folder permission and define file location
         if ( wp_mkdir_p( $upload_dir['path'] ) ) {
             $file = $upload_dir['path'] . '/' . $filename;

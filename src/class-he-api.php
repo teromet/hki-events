@@ -11,7 +11,7 @@ use HkiEvents\HE_Utils as Utils;
 /**
  * HE_API
  *
- * Provides an access to Helsinki Linked Events API
+ * Provides an access to Linked Events API 
  *
  */
 class HE_API {
@@ -70,7 +70,7 @@ class HE_API {
     }
 
     /**
-     * Get all upcoming subevents for specific superevent. Return array of events or WP_Error
+     * Get all subevents for specific superevent. Return array of events or WP_Error
      * 
      * @param string $event_id
      * 
@@ -81,8 +81,7 @@ class HE_API {
 
         // API Params
         $params = array( 
-            'super_event' => $event_id,
-            'start' => get_option( 'hki_events_api_start_date' ) ? get_option( 'hki_events_api_start_date' ) : 'today'
+            'super_event' => $event_id
         );
 
         $events = $this->get_events( $params );
