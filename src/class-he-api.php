@@ -20,16 +20,18 @@ class HE_API {
 
 
     /**
-     * Get events. Return array of events or WP_Error
+     * Get events. Return an array containing result meta data and events or WP_Error
      *
      * @return array|WP_Error
      * 
      */
     private function get_events( $params ) {
 
-        Utils::log( 'query-log', 'query: '.self::HE_API_URL.http_build_query($params) );
+        $api_query = self::HE_API_URL.http_build_query( $params );
 
-        $response = wp_remote_get( self::HE_API_URL.http_build_query($params), ['timeout' => 10] );
+        Utils::log( 'query-log', 'query: '.urldecode( self::HE_API_URL.http_build_query( $params ) ) );
+
+        $response = wp_remote_get( $api_query, ['timeout' => 10] );
         $events = array();
 
         if( is_wp_error( $response ) ) {
@@ -39,31 +41,50 @@ class HE_API {
         $response_body = wp_remote_retrieve_body( $response );
         $response_body = json_decode( $response_body );
 
-        if( !empty( $response_body ) && !empty( $response_body->data ) ) {
-            $events = $response_body->data;
-        }
-
-        return $events;
+        return $response_body;
 
     }
 
     /**
-     * Get upcoming events. Return array of events or WP_Error
+     * Get upcoming events from the next month. Return array of events or WP_Error
      *
      * @return array|WP_Error
      * 
      */
     public function get_upcoming_events() {
 
+        require_once( HE_DIR . '/inc/api-config.php' );
+
+        $page = 1;
+        $events = array();
+
+        $dt = new \DateTime( 'now', new \DateTimeZone('Europe/Helsinki') );
+        $time = $dt->getTimestamp();
+        $end = date( 'Y-m-d', strtotime( '+1 month', $time ) );
+
         // API Params
         $params = array( 
             'is_free' => 'true',
-            'keyword' => 'yso:p27962',
+            'keyword' => implode( ",", $event_categories ),
+            'keyword!' => implode( ",", $skip_categories ),
             'hide_recurring_children' => 'true',
-            'start' => get_option( 'hki_events_api_start_date' ) ? get_option( 'hki_events_api_start_date' ) : 'today'
+            'start' => get_option( 'hki_events_api_start_date' ) ? get_option( 'hki_events_api_start_date' ) : 'today',
+            'sort' => 'end_time',
+            'end' => $end,
+            'page' => $page
         );
 
-        $events = $this->get_events( $params );
+        do {
+
+            $results = $this->get_events( $params );
+
+            if( !empty( $results ) && !empty( $results->data ) ) {
+                $events = array_merge( $events, $results->data );
+                $params['page'] = $params['page'] + 1;
+            }
+
+
+        } while ( $results->meta->next );
 
         return $events;
 

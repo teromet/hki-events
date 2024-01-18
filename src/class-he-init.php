@@ -83,12 +83,10 @@ class HE_Init {
 
         if( $events ) {
             foreach ( $events as $event ) {
-
-                // Skip events with no start time
-                if( !$event->start_time ) {
+                // Skip events with no start time and test events
+                if( !$event->start_time || str_contains( strtolower($event->name->fi), 'testitapahtuma' ) ) {
                     continue;
-                }
-                
+                }      
                 $this->create_event( $event );
             }
         }
@@ -183,8 +181,8 @@ class HE_Init {
             $image_size = 'full'; // (thumbnail, medium, large, full or custom size)
             $start_date = get_post_meta( $post_id, 'hki_event_start_time', true );
             $end_date = get_post_meta( $post_id, 'hki_event_end_time', true );  
-            $start = date( 'd.m.Y k\l\o H.i', strtotime( $start_date ) );
-            $end = date( 'd.m.Y k\l\o H.i', strtotime( $end_date ) );
+            $start = date( 'j.n.Y k\l\o G.i', strtotime( $start_date ) );
+            $end = date( 'j.n.Y k\l\o G.i', strtotime( $end_date ) );
 
             ?>
             <div class="hki-events-list-item">

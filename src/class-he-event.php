@@ -96,10 +96,10 @@ class HE_Event {
 
         if ( $this->recurring && !empty( $this->dates ) ) {
 
-            $date_formatted = implode(', ', array_map(
+            $date_formatted = implode( ', ', array_map(
                 function( $v ) { 
                     return date( 'j.n.Y', strtotime( $v ) );
-                }, array_values($this->dates) )
+                }, array_values( $this->dates ) )
             );
 
         }
