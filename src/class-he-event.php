@@ -92,21 +92,28 @@ class HE_Event {
      */
     private function add_event_dates( $post_id ) {
 
-        $date_formatted = date( 'j.n.Y', strtotime( $this->start_time ) );
+        if ( !empty( $this->start_time ) && strtotime( $this->start_time ) ) {
+            update_field( 'hki_event_start_time', $this->start_time, $post_id );
+        }
+        if ( !empty( $this->end_time ) && strtotime( $this->end_time ) ) {
+            update_field( 'hki_event_end_time', $this->end_time, $post_id );
+        }
 
         if ( $this->recurring && !empty( $this->dates ) ) {
+
+            $dates = array_filter( $this->dates, function( $v ) {
+                return !empty( $v ) && strtotime( $v );
+            } );
 
             $date_formatted = implode( ', ', array_map(
                 function( $v ) { 
                     return date( 'j.n.Y', strtotime( $v ) );
-                }, array_values( $this->dates ) )
+                }, array_values( $dates ) )
             );
 
-        }
+            update_field( 'hki_event_dates', $date_formatted, $post_id );
 
-        update_field( 'hki_event_start_time', $this->start_time, $post_id );
-        update_field( 'hki_event_end_time', $this->end_time, $post_id );
-        update_field( 'hki_event_dates', $date_formatted, $post_id );
+        }
 
     }
 

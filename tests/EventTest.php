@@ -24,9 +24,9 @@ class EventTest extends TestCase {
             'description' => 'Lorem ipsum dolor sit amet',
             'recurring' => true,
             'dates' => array(
-                0 => '2024-01-11T17:00:00Z',
-                1 => '2024-01-21T17:00:00Z',
-                2 => '2024-01-25T17:00:00Z'
+                '2024-01-11T17:00:00Z',
+                '2024-01-21T17:00:00Z',
+                '2024-01-25T17:00:00Z'
             )
         );
 
@@ -80,9 +80,9 @@ class EventTest extends TestCase {
     public function test_add_event_dates_recurringEventDatesAreAddedCorrectly() {
 
         $dates = $this->event_args['dates'];  
-        $dates_saved = explode(', ', get_post_meta( $this->post_id, 'hki_event_dates', true ));
+        $dates_saved = explode( ', ', get_post_meta( $this->post_id, 'hki_event_dates', true ) );
 
-        foreach($dates as $key => $value) {
+        foreach( $dates as $key => $value ) {
             $date1 = new \DateTime( $value );
             $date2 = new \DateTime( $dates_saved[$key] );
             $this->assertEquals( $date1->format('j.n.Y'), $date2->format('j.n.Y') );
@@ -90,6 +90,48 @@ class EventTest extends TestCase {
 
     }
 
+    public function test_add_event_dates_incorrectDatesAreIgnored() {
 
+        $args = $this->event_args;
+        $args['title'] = 'Test event 2';
+        $args['start_time'] = '2024-fooo01-11T17:00:00Z';
+        $args['end_time'] = '2024-01-11T17:00:00Z2023-01-02';
+
+        $event = new Event( $args );
+        $post_id = $event->save();
+
+        $start_time_saved = get_post_meta( $post_id, 'hki_event_start_time', true );
+        $end_time_saved = get_post_meta( $post_id, 'hki_event_end_time', true );
+
+        $this->assertEmpty( $start_time_saved );
+        $this->assertEmpty( $end_time_saved );
+
+        wp_delete_post( $post_id, true );
+
+    }
+
+    public function test_add_event_dates_incorrectRecurringEventDatesAreIgnored() {
+
+        $args = $this->event_args;
+        $args['title'] = 'Test event 3';
+        $args['dates'] = array(
+            '2024-01-11T17:00:00Z',
+            '',
+            'lorem ipsum',
+            '2024-01-21T17:00:00Z',
+            '2024-01-23fooT17:00:00Z',
+            '2024-01-25T17:00:00Z'
+        );
+
+        $event = new Event( $args );
+        $post_id = $event->save();
+
+        $dates_saved = explode( ', ', get_post_meta( $post_id, 'hki_event_dates', true ) );
+
+        $this->assertCount( 3, $dates_saved );
+        
+        wp_delete_post( $post_id, true );
+
+    }
 
 }
