@@ -18,6 +18,7 @@ class HE_Event {
     private $start_time;
     private $end_time;
     private $image_url;
+    private $image_alt_text;
     private $description;
     private $recurring;
     private $dates;
@@ -28,6 +29,7 @@ class HE_Event {
         $this->start_time = $args['start_time'];
         $this->end_time = $args['end_time'];
         $this->image_url = $args['image_url'];
+        $this->image_alt_text = $args['image_alt_text'];
         $this->description = $args['description'];
         $this->recurring = $args['recurring'];
         $this->dates = $args['dates'];
@@ -75,14 +77,13 @@ class HE_Event {
      */
     private function add_thumbnail( $post_id ) {
 
-        $current_image_url = get_post_meta( $post_id, 'hki_event_image_url', true );
-
-        if ( empty ( $current_image_url ) || $current_image_url !== $this->image_url ) {
-            Utils::upload_thumbnail_from_url( $post_id, $this->image_url );
+        if ( !empty( $this->image_url ) ) {
+            update_field( 'hki_event_image_url', $this->image_url, $post_id );
         }
-
-        add_post_meta( $post_id, 'hki_event_image_url', $this->image_url );
-
+        if ( !empty( $this->image_alt_text ) ) {
+            update_field( 'hki_event_image_alt_text', $this->image_alt_text, $post_id );
+        }
+        
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-spl_autoload_register('he_autoloader');
+spl_autoload_register( 'he_autoloader' );
 
 /**
  * Autoloader
@@ -11,7 +11,7 @@ function he_autoloader( $class ) {
 
     $namespace = 'HkiEvents';
   
-    if ( strpos($class, $namespace) !== 0 ) {
+    if ( strpos( $class, $namespace ) !== 0 ) {
         return;
     }
   
@@ -22,8 +22,8 @@ function he_autoloader( $class ) {
   
     $path = HE_DIR . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . $class;
 
-    if ( file_exists($path) ) {
-        require_once($path);
+    if ( file_exists( $path ) ) {
+        require_once( $path );
     }
 
 }

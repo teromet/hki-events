@@ -43,6 +43,8 @@ class HE_Init {
             $this->handle_cron();
         }
 
+        add_filter( 'post_thumbnail_html', array( $this, 'filter_event_thumbnail' ), 10, 3 );
+
     }
 
     /**
@@ -114,6 +116,7 @@ class HE_Init {
         }
 
         $event_args['image_url'] = !empty( $event->images ) && !empty( $event->images[0]->url ) ? $event->images[0]->url : '';
+        $event_args['image_alt_text'] = !empty( $event->images ) && !empty( $event->images[0]->alt_text ) ? $event->images[0]->alt_text : '';
 
         $event = new Event( $event_args );
         $post_id = $event->save();
@@ -142,6 +145,23 @@ class HE_Init {
 
     }
 
+    public function filter_event_thumbnail( $html, $post_id, $thumbnail_id ) {
+
+        if ( !$thumbnail_id ) {
+
+            $src = get_post_meta( $post_id, 'hki_event_image_url', true );
+            $alt = get_post_meta( $post_id, 'hki_event_image_alt_text', true );
+
+            $alt_str = !empty ( $alt ) ? 'alt="'.$alt.'"' : '';
+
+            if ( $src ) {
+                $html = '<img src="' . $src . '" '.$alt_str.'>';
+            }
+        }
+
+        return $html;
+
+    }
 
     public function shortcode() {
 
@@ -186,11 +206,11 @@ class HE_Init {
 
             ?>
             <div class="hki-events-list-item">
-            <?php if( has_post_thumbnail() ):
+            <?php //if( has_post_thumbnail() ):
               echo '<div class="post-image">';
-                echo wp_get_attachment_image( $image, 'large' );
+                the_post_thumbnail();
               echo '</div>';
-            endif; ?>
+           // endif; ?>
             <div class="post-content">
                 <div class="post-content-wrapper">
                     <div class="post-date"><?php echo $start; ?></div>
