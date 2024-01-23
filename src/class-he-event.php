@@ -4,7 +4,7 @@ namespace HkiEvents;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-use HkiEvents\HE_Utils as Utils;
+
 
 /**
  * HE_Event
@@ -14,25 +14,81 @@ use HkiEvents\HE_Utils as Utils;
  */
 class HE_Event {
 
-    private $title;
+    /**
+     * The event's Linked Events API ID.
+     *
+     * @var string
+     */
+    private $id;
+
+    /**
+     * The name of the event.
+     *
+     * @var string
+     */
+    private $name;
+    
+    /**
+     * The start time of the event in ISO 8601 format.
+     *
+     * @var string
+     */
     private $start_time;
+
+    /**
+     * The end time of the event in ISO 8601 format.
+     *
+     * @var string
+     */
     private $end_time;
-    private $image_url;
-    private $image_alt_text;
+ 
+    /**
+     * The description of the event.
+     *
+     * @var string
+     */
     private $description;
+ 
+    /**
+     * If event is recurring or not.
+     *
+     * @var bool
+     */
     private $recurring;
+
+    /**
+     * Event dates
+     *
+     * @var array
+     */
     private $dates;
 
-    function __construct( $args ) {
+    /**
+     * Event image's (thumbnail) source URL
+     *
+     * @var string
+     */
+    private $image_url;
 
-        $this->title = $args['title'];
-        $this->start_time = $args['start_time'];
-        $this->end_time = $args['end_time'];
-        $this->image_url = $args['image_url'];
-        $this->image_alt_text = $args['image_alt_text'];
-        $this->description = $args['description'];
-        $this->recurring = $args['recurring'];
-        $this->dates = $args['dates'];
+    /**
+     * Alt text of the image
+     *
+     * @var string
+     */
+    private readonly string $image_alt_text;
+
+
+    function __construct( $event, $dates ) {
+
+        $this->id               = $event->id;
+        $this->name             = $event->name->fi;
+        $this->start_time       = $event->start_time;
+        $this->end_time         = $event->end_time;
+        $this->description      = $event->description->fi;
+        $this->recurring        = $event->super_event_type === 'recurring' ? true : false;
+        $this->dates            = $dates;
+        $this->image_url        = !empty( $event->images ) && !empty( $event->images[0]->url ) ?  $event->images[0]->url : '';
+        $this->image_alt_text   = !empty( $event->images ) && !empty( $event->images[0]->alt_text ) ?  $event->images[0]->alt_text : '';
 
     }
 
@@ -47,17 +103,9 @@ class HE_Event {
             require_once( ABSPATH . 'wp-admin/includes/post.php' );
         }
 
-        $existing_id = post_exists( $this->title, '', '', HE_POST_TYPE );
+        $existing_id = post_exists( $this->name, '', '', HE_POST_TYPE );
 
-        $post_data = array(
-            'ID' => $existing_id,
-            'post_title' => $this->title,
-            'post_content' => $this->description,
-            'post_type' => HE_POST_TYPE,
-            'post_status' => 'publish'
-        );
-
-        $post_id = wp_insert_post( $post_data );
+        $post_id = wp_insert_post( $this->props_to_args( $existing_id ) );
 
         if( !is_wp_error( $post_id ) && $post_id > 0 ) {
 
@@ -115,6 +163,18 @@ class HE_Event {
             update_field( 'hki_event_dates', $date_formatted, $post_id );
 
         }
+
+    }
+
+    private function props_to_args( $post_id ) {
+
+        return array(
+            'ID' => $post_id,
+            'post_title' => $this->name,
+            'post_content' => $this->description,
+            'post_type' => HE_POST_TYPE,
+            'post_status' => 'publish'
+        );
 
     }
 

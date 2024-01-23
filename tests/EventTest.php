@@ -12,25 +12,31 @@ use PHPUnit\Framework\TestCase;
 class EventTest extends TestCase {
 
     public $post_id;
-    public $event_args;
+    public $event;
+    public $dates;
 
     protected function setUp(): void {
 
-        $this->event_args = array(
-            'title' => 'Test event',
+        $this->event = json_decode(json_encode(array(
+            'id' => 'test:0353',
+            'name' => array(
+                'fi' => 'Test event'
+            ),
             'start_time' => '2024-01-11T17:00:00Z',
             'end_time' => '2024-01-11T17:00:00Z',
-            'image_url' => 'http://sandbox.local',
-            'description' => 'Lorem ipsum dolor sit amet',
-            'recurring' => true,
-            'dates' => array(
-                '2024-01-11T17:00:00Z',
-                '2024-01-21T17:00:00Z',
-                '2024-01-25T17:00:00Z'
-            )
+            'description' => array(
+                'fi' => 'Lorem ipsum dolor sit amet'
+            ),
+            'super_event_type' => 'recurring'
+        )));
+
+        $this->dates = array(
+            '2024-01-11T17:00:00Z',
+            '2024-01-21T17:00:00Z',
+            '2024-01-25T17:00:00Z'
         );
 
-        $event = new Event( $this->event_args );
+        $event = new Event( $this->event, $this->dates );
         $this->post_id = $event->save();
 
     }
@@ -48,21 +54,17 @@ class EventTest extends TestCase {
     }
 
     public function test_save_postTitleIsSavedCorrectly() {
-        $this->assertEquals( $this->event_args['title'], get_post( $this->post_id )->post_title );
+        $this->assertEquals( $this->event->name->fi, get_post( $this->post_id )->post_title );
     }
 
     public function test_save_postContentIsSavedCorrectly() {
-        $this->assertEquals( $this->event_args['description'], get_post( $this->post_id )->post_content );
-    }
-
-    public function test_save_imageUrlIsSavedCorrectly() {
-        $this->assertEquals( $this->event_args['image_url'], get_post_meta( $this->post_id, 'hki_event_image_url', true ) );
+        $this->assertEquals( $this->event->description->fi, get_post( $this->post_id )->post_content );
     }
 
     public function test_add_event_dates_eventDatesAreAddedCorrectly() {
 
-        $start_time = $this->event_args['start_time'];  
-        $end_time = $this->event_args['end_time'];
+        $start_time = $this->event->start_time;
+        $end_time = $this->event->end_time;
 
         $start_time_saved = get_post_meta( $this->post_id, 'hki_event_start_time', true );
         $end_time_saved = get_post_meta( $this->post_id, 'hki_event_end_time', true );
@@ -79,7 +81,7 @@ class EventTest extends TestCase {
 
     public function test_add_event_dates_recurringEventDatesAreAddedCorrectly() {
 
-        $dates = $this->event_args['dates'];  
+        $dates = $this->dates;
         $dates_saved = explode( ', ', get_post_meta( $this->post_id, 'hki_event_dates', true ) );
 
         foreach( $dates as $key => $value ) {
@@ -92,12 +94,12 @@ class EventTest extends TestCase {
 
     public function test_add_event_dates_incorrectDatesAreIgnored() {
 
-        $args = $this->event_args;
-        $args['title'] = 'Test event 2';
-        $args['start_time'] = '2024-fooo01-11T17:00:00Z';
-        $args['end_time'] = '2024-01-11T17:00:00Z2023-01-02';
+        $event = $this->event;
+        $event->name->fi = 'Test event 2';
+        $event->start_time = '2024-fooo01-11T17:00:00Z';
+        $event->end_time = '2024-01-11T17:00:00Z2023-01-02';
 
-        $event = new Event( $args );
+        $event = new Event( $event, $this->dates );
         $post_id = $event->save();
 
         $start_time_saved = get_post_meta( $post_id, 'hki_event_start_time', true );
@@ -112,9 +114,9 @@ class EventTest extends TestCase {
 
     public function test_add_event_dates_incorrectRecurringEventDatesAreIgnored() {
 
-        $args = $this->event_args;
-        $args['title'] = 'Test event 3';
-        $args['dates'] = array(
+        $event = $this->event;
+        $event->name->fi = 'Test event 3';
+        $dates = array(
             '2024-01-11T17:00:00Z',
             '',
             'lorem ipsum',
@@ -123,7 +125,7 @@ class EventTest extends TestCase {
             '2024-01-25T17:00:00Z'
         );
 
-        $event = new Event( $args );
+        $event = new Event( $event, $dates );
         $post_id = $event->save();
 
         $dates_saved = explode( ', ', get_post_meta( $post_id, 'hki_event_dates', true ) );

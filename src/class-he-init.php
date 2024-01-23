@@ -4,15 +4,12 @@ namespace HkiEvents;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-use HkiEvents\HE_API as Api;
 use HkiEvents\HE_CPT as CPT;
-use HkiEvents\HE_Event as Event;
+use HkiEvents\HE_Event_Creator as Event_Creator;
 use HkiEvents\HE_Settings_Page as Settings_Page;
 use HkiEvents\HE_Utils as Utils;
 
 class HE_Init {
-
-    private $api;
 
     const CRON_HOOK = 'hki_events_cron';
 
@@ -79,69 +76,8 @@ class HE_Init {
 
     public function handle_cron() {
 
-        $this->api = new Api();
-
-        $events = $this->api->get_upcoming_events();
-
-        if( $events ) {
-            foreach ( $events as $event ) {
-                // Skip events with no start time and test events
-                if( !$event->start_time || str_contains( strtolower($event->name->fi), 'testitapahtuma' ) ) {
-                    continue;
-                }      
-                $this->create_event( $event );
-            }
-        }
-
-    }
-
-    /**
-     * Create WP_Post for every event received
-     *
-     * @param array $event   Event data from Linked Events API
-     */
-    private function create_event( $event ) {
-
-        $event_args = array(
-            'title' => $event->name->fi,
-            'start_time' => $event->start_time,
-            'end_time' => $event->end_time,
-            'description' => $event->description->fi,
-            'recurring' => $event->super_event_type === 'recurring' ? true : false,
-            'dates' => array( $event->start_time )
-        );
-
-        if( $event->super_event_type === 'recurring' ) {
-            $event_args['dates'] = $this->get_sub_event_dates( $event->id );
-        }
-
-        $event_args['image_url'] = !empty( $event->images ) && !empty( $event->images[0]->url ) ? $event->images[0]->url : '';
-        $event_args['image_alt_text'] = !empty( $event->images ) && !empty( $event->images[0]->alt_text ) ? $event->images[0]->alt_text : '';
-
-        $event = new Event( $event_args );
-        $post_id = $event->save();
-
-    }
-
-    /**
-     * Get sub event dates of an recurring (super) event
-     *
-     * @param string $event_id   Linked Events API event id
-     * @return array Array of sub event dates in ascending order
-     */
-    private function get_sub_event_dates( $event_id ) {
-
-        $dates = array();
-
-        $sub_events = $this->api->get_sub_events( $event_id );
-
-        if( $sub_events ) {
-            foreach ( $sub_events as $event ) {
-                $dates[] = $event->start_time;
-            }
-        }
-
-        return array_reverse( $dates );
+        $event_creator = new Event_Creator();
+        $event_creator->get_events();
 
     }
 

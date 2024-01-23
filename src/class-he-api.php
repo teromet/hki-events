@@ -35,7 +35,7 @@ class HE_API {
         $events = array();
 
         if( is_wp_error( $response ) ) {
-            return new WP_Error( 'api error', __( 'API Error', 'hki_events' ) );
+            return new \WP_Error( 'api error', __( 'API Error', 'hki_events' ) );
         }
 
         $response_body = wp_remote_retrieve_body( $response );
@@ -58,7 +58,7 @@ class HE_API {
         $page = 1;
         $events = array();
 
-        $dt = new \DateTime( 'now', new \DateTimeZone('Europe/Helsinki') );
+        $dt = new \DateTime( 'now', new \DateTimeZone( 'Europe/Helsinki' ) );
         $time = $dt->getTimestamp();
         $end = date( 'Y-m-d', strtotime( '+1 month', $time ) );
 
