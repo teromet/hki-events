@@ -7,7 +7,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 use HkiEvents\HE_CPT as CPT;
 use HkiEvents\HE_Event_Creator as Event_Creator;
 use HkiEvents\HE_Settings_Page as Settings_Page;
-use HkiEvents\HE_Utils as Utils;
 
 class HE_Init {
 
@@ -83,7 +82,7 @@ class HE_Init {
 
     public function filter_event_thumbnail( $html, $post_id, $thumbnail_id ) {
 
-        if ( !$thumbnail_id ) {
+        if ( ! $thumbnail_id ) {
 
             $src = get_post_meta( $post_id, 'hki_event_image_url', true );
             $alt = get_post_meta( $post_id, 'hki_event_image_alt_text', true );

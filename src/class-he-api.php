@@ -4,9 +4,7 @@ namespace HkiEvents;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-
 use HkiEvents\HE_Utils as Utils;
-
 
 /**
  * HE_API
@@ -21,27 +19,33 @@ class HE_API {
 
     /**
      * Get events. Return an array containing result meta data and events or WP_Error
+     * 
+     * @param array $params API params
+     * @param bool $meta_data Include meta data in the results
      *
      * @return array|WP_Error
      * 
      */
-    private function get_events( $params ) {
+    private function get_events( $params, $meta_data = true ) {
 
         $api_query = self::HE_API_URL.http_build_query( $params );
 
         Utils::log( 'query-log', 'query: '.urldecode( self::HE_API_URL.http_build_query( $params ) ) );
 
         $response = wp_remote_get( $api_query, ['timeout' => 10] );
-        $events = array();
 
         if( is_wp_error( $response ) ) {
             return new \WP_Error( 'api error', __( 'API Error', 'hki_events' ) );
         }
 
         $response_body = wp_remote_retrieve_body( $response );
-        $response_body = json_decode( $response_body );
+        $results = json_decode( $response_body );
 
-        return $response_body;
+        if( ! $meta_data ) {
+            $results = $results->data;
+        }
+
+        return $results;
 
     }
 
@@ -78,7 +82,7 @@ class HE_API {
 
             $results = $this->get_events( $params );
 
-            if( !empty( $results ) && !empty( $results->data ) ) {
+            if( ! empty( $results ) && ! empty( $results->data ) ) {
                 $events = array_merge( $events, $results->data );
                 $params['page'] = $params['page'] + 1;
             }
@@ -105,7 +109,7 @@ class HE_API {
             'super_event' => $event_id
         );
 
-        $events = $this->get_events( $params );
+        $events = $this->get_events( $params, false );
 
         return $events;
 

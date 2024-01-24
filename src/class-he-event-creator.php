@@ -38,7 +38,7 @@ class HE_Event_Creator {
         if( $events ) {
             foreach ( $events as $event ) {
                 // Skip events with no start time and test events
-                if( !$event->start_time || str_contains( strtolower( $event->name->fi ), 'testitapahtuma' ) ) {
+                if( ! $event->start_time || str_contains( strtolower( $event->name->fi ), 'testitapahtuma' ) ) {
                     continue;
                 }      
                 $this->create_event( $event );

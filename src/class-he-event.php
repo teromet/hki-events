@@ -4,8 +4,6 @@ namespace HkiEvents;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-
-
 /**
  * HE_Event
  *
@@ -107,7 +105,7 @@ class HE_Event {
 
         $post_id = wp_insert_post( $this->props_to_args( $existing_id ) );
 
-        if( !is_wp_error( $post_id ) && $post_id > 0 ) {
+        if( ! is_wp_error( $post_id ) && $post_id > 0 ) {
 
             $this->add_thumbnail( $post_id );
             $this->add_event_dates( $post_id );
@@ -125,10 +123,10 @@ class HE_Event {
      */
     private function add_thumbnail( $post_id ) {
 
-        if ( !empty( $this->image_url ) ) {
+        if ( ! empty( $this->image_url ) ) {
             update_field( 'hki_event_image_url', $this->image_url, $post_id );
         }
-        if ( !empty( $this->image_alt_text ) ) {
+        if ( ! empty( $this->image_alt_text ) ) {
             update_field( 'hki_event_image_alt_text', $this->image_alt_text, $post_id );
         }
         
@@ -141,10 +139,10 @@ class HE_Event {
      */
     private function add_event_dates( $post_id ) {
 
-        if ( !empty( $this->start_time ) && strtotime( $this->start_time ) ) {
+        if ( ! empty( $this->start_time ) && strtotime( $this->start_time ) ) {
             update_field( 'hki_event_start_time', $this->start_time, $post_id );
         }
-        if ( !empty( $this->end_time ) && strtotime( $this->end_time ) ) {
+        if ( ! empty( $this->end_time ) && strtotime( $this->end_time ) ) {
             update_field( 'hki_event_end_time', $this->end_time, $post_id );
         }
 

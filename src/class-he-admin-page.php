@@ -25,9 +25,11 @@ abstract class HE_Admin_Page {
     protected function get_page_title() {
         return __( 'Tapahtumien tuonti', 'hki_events' );
     }
+
     protected function get_menu_title() {
         return __( 'Tapahtumien tuonti', 'hki_events' );
     }
+
     protected function get_capability() {
         return 'manage_options';
     }
@@ -97,7 +99,6 @@ abstract class HE_Admin_Page {
 
     }
 
-
     public function render_section() {
         ?>
         <h2><?php _e( '', 'hki-events-settings-item-sub' ); ?></h2>
@@ -110,4 +111,5 @@ abstract class HE_Admin_Page {
         <input type="text" name="hki_events_api_start_date" value="<?php echo $stored_option; ?>" />
         <?php
     }
+    
 }
