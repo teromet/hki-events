@@ -20,6 +20,13 @@ class HE_Event {
     private $id;
 
     /**
+     * The event's post ID
+     *
+     * @var int
+     */
+    private $post_id;
+
+    /**
      * The name of the event.
      *
      * @var string
@@ -62,6 +69,13 @@ class HE_Event {
     private $dates;
 
     /**
+     * Event's Linked Events API keywords
+     *
+     * @var array
+     */
+    private $keywords;
+
+    /**
      * Event image's (thumbnail) source URL
      *
      * @var string
@@ -76,7 +90,7 @@ class HE_Event {
     private readonly string $image_alt_text;
 
 
-    function __construct( $event, $dates ) {
+    function __construct( $event, $dates, $keywords = array() ) {
 
         $this->id               = $event->id;
         $this->name             = $event->name->fi;
@@ -85,6 +99,7 @@ class HE_Event {
         $this->description      = $event->description->fi;
         $this->recurring        = $event->super_event_type === 'recurring' ? true : false;
         $this->dates            = $dates;
+        $this->keywords         = $keywords;
         $this->image_url        = !empty( $event->images ) && !empty( $event->images[0]->url ) ?  $event->images[0]->url : '';
         $this->image_alt_text   = !empty( $event->images ) && !empty( $event->images[0]->alt_text ) ?  $event->images[0]->alt_text : '';
 
@@ -103,31 +118,31 @@ class HE_Event {
 
         $existing_id = post_exists( $this->name, '', '', HE_POST_TYPE );
 
-        $post_id = wp_insert_post( $this->props_to_args( $existing_id ) );
+        $this->post_id = wp_insert_post( $this->props_to_args( $existing_id ) );
 
-        if( ! is_wp_error( $post_id ) && $post_id > 0 ) {
+        if( ! is_wp_error( $this->post_id ) && $this->post_id > 0 ) {
 
-            $this->add_thumbnail( $post_id );
-            $this->add_event_dates( $post_id );
-        
+            $this->add_thumbnail();
+            $this->add_dates();
+            $this->add_tags();
+
         }
 
-        return $post_id;
+        return $this->post_id;
 
     }
 
     /**
      * Add post thumbnail from url
-     * 
-     * @param int $post_id
+     *
      */
-    private function add_thumbnail( $post_id ) {
+    private function add_thumbnail() {
 
         if ( ! empty( $this->image_url ) ) {
-            update_field( 'hki_event_image_url', $this->image_url, $post_id );
+            update_field( 'hki_event_image_url', $this->image_url, $this->post_id );
         }
         if ( ! empty( $this->image_alt_text ) ) {
-            update_field( 'hki_event_image_alt_text', $this->image_alt_text, $post_id );
+            update_field( 'hki_event_image_alt_text', $this->image_alt_text, $this->post_id );
         }
         
     }
@@ -135,21 +150,20 @@ class HE_Event {
     /**
      * Add or update event dates
      * 
-     * @param int $post_id
      */
-    private function add_event_dates( $post_id ) {
+    private function add_dates() {
 
         if ( ! empty( $this->start_time ) && strtotime( $this->start_time ) ) {
-            update_field( 'hki_event_start_time', $this->start_time, $post_id );
+            update_field( 'hki_event_start_time', $this->start_time, $this->post_id );
         }
         if ( ! empty( $this->end_time ) && strtotime( $this->end_time ) ) {
-            update_field( 'hki_event_end_time', $this->end_time, $post_id );
+            update_field( 'hki_event_end_time', $this->end_time, $this->post_id );
         }
 
         if ( $this->recurring && !empty( $this->dates ) ) {
 
             $dates = array_filter( $this->dates, function( $v ) {
-                return !empty( $v ) && strtotime( $v );
+                return ! empty( $v ) && strtotime( $v );
             } );
 
             $date_formatted = implode( ', ', array_map(
@@ -158,12 +172,39 @@ class HE_Event {
                 }, array_values( $dates ) )
             );
 
-            update_field( 'hki_event_dates', $date_formatted, $post_id );
+            update_field( 'hki_event_dates', $date_formatted, $this->post_id );
 
         }
 
     }
 
+    /**
+     * Add event post tags
+     * 
+     */
+    private function add_tags() {
+
+        if ( ! empty( $this->keywords ) ) {
+
+            $tags = array_map(
+                function( $v ) { 
+                    if( is_array( $v ) && array_key_exists( 'name', $v ) ) {
+                        return $v['name'];
+                    }     
+                }, array_values( $this->keywords ) );
+    
+            wp_set_post_tags( $this->post_id, $tags, false );
+
+        }
+
+    }
+    
+    /**
+     * Create a WP_Post args array
+     * 
+     * @param int $post_id
+     * @return array post args
+     */
     private function props_to_args( $post_id ) {
 
         return array(

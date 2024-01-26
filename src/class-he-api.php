@@ -14,9 +14,8 @@ use HkiEvents\HE_Utils as Utils;
  */
 class HE_API {
 
-    const HE_API_URL = 'https://api.hel.fi/linkedevents/v1/event/?';
-
-
+    const HE_API_URL = 'https://api.hel.fi/linkedevents/v1/';
+    
     /**
      * Get events. Return an array containing result meta data and events or WP_Error
      * 
@@ -28,9 +27,9 @@ class HE_API {
      */
     private function get_events( $params, $meta_data = true ) {
 
-        $api_query = self::HE_API_URL.http_build_query( $params );
+        $api_query = self::HE_API_URL.'event/?'.http_build_query( $params );
 
-        Utils::log( 'query-log', 'query: '.urldecode( self::HE_API_URL.http_build_query( $params ) ) );
+        Utils::log( 'query-log', 'query: '.urldecode( $api_query ) );
 
         $response = wp_remote_get( $api_query, ['timeout' => 10] );
 
@@ -112,6 +111,33 @@ class HE_API {
         $events = $this->get_events( $params, false );
 
         return $events;
+
+    }
+
+    /**
+     * Get keyword. Return keyword data or WP_Error
+     * 
+     * @param string $keyword_id Linked Events API Keyword ID
+     *
+     * @return object|WP_Error
+     * 
+     */
+    public function get_keyword( $keyword_id ) {
+
+        $api_query = self::HE_API_URL.'keyword/'.$keyword_id;
+
+        Utils::log( 'query-log', 'query: '.urldecode( $api_query ) );
+
+        $response = wp_remote_get( $api_query, ['timeout' => 10] );
+
+        if( is_wp_error( $response ) ) {
+            return new \WP_Error( 'api error', __( 'API Error', 'hki_events' ) );
+        }
+
+        $response_body = wp_remote_retrieve_body( $response );
+        $keyword = json_decode( $response_body );
+
+        return $keyword;
 
     }
 

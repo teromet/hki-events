@@ -12,8 +12,10 @@ use PHPUnit\Framework\TestCase;
 class EventTest extends TestCase {
 
     public $post_id;
+    public $post_ids = array();
     public $event;
     public $dates;
+    public $keywords;
 
     protected function setUp(): void {
 
@@ -36,12 +38,33 @@ class EventTest extends TestCase {
             '2024-01-25T17:00:00Z'
         );
 
-        $event = new Event( $this->event, $this->dates );
+        $this->keywords = array(
+            array(
+                'id' => 'yso:p10649',
+                'name' => 'valokuvataide'
+            ),
+            array(
+                'id' => 'yso:p16866',
+                'name' => 'valokuvanäyttelyt'
+            ),
+            array(
+                'id' => 'yso:p4484',
+                'name' => 'jazz'
+            )
+        );
+
+        $event = new Event( $this->event, $this->dates, $this->keywords );
         $this->post_id = $event->save();
 
     }
+    
     protected function tearDown(): void {
+
         wp_delete_post( $this->post_id, true );
+
+        foreach( $this->post_ids as $post_id ) {
+            wp_delete_post( $post_id, true );
+        }
     }
 
     public function test_save_postTypeIsCorrect() {
@@ -101,14 +124,13 @@ class EventTest extends TestCase {
 
         $event = new Event( $event, $this->dates );
         $post_id = $event->save();
+        $this->post_ids[] = $post_id;
 
         $start_time_saved = get_post_meta( $post_id, 'hki_event_start_time', true );
         $end_time_saved = get_post_meta( $post_id, 'hki_event_end_time', true );
 
         $this->assertEmpty( $start_time_saved );
         $this->assertEmpty( $end_time_saved );
-
-        wp_delete_post( $post_id, true );
 
     }
 
@@ -127,12 +149,73 @@ class EventTest extends TestCase {
 
         $event = new Event( $event, $dates );
         $post_id = $event->save();
+        $this->post_ids[] = $post_id;
 
         $dates_saved = explode( ', ', get_post_meta( $post_id, 'hki_event_dates', true ) );
 
         $this->assertCount( 3, $dates_saved );
-        
-        wp_delete_post( $post_id, true );
+
+        foreach( $dates_saved as $date ) {
+            $this->assertIsInt( strtotime( $date ) );
+        }
+
+    }
+
+    public function test_add_tags_postTagsAreAddedCorrectly() {
+
+        $keywords = $this->keywords;
+        $post_tags = get_the_tags( $this->post_id );
+
+        usort( $keywords, function( $a, $b ) {
+        return strcmp( $a["name"], $b["name"] );
+        } );
+
+        foreach( $post_tags as $key => $term ) {
+            $this->assertEquals( $term->name, $keywords[$key]['name'] );
+        }
+
+    }
+
+    public function test_add_tags_incorrectKeywordDataIsIgnored() {
+
+        $event = $this->event;
+        $event->name->fi = 'Test event 4';
+
+        $keywords = array(
+            array(
+            'id' => 'yso:p10649',
+            'name' => 'valokuvataide'
+            ),
+            'lorem ipsum',
+            array(
+                'id' => 'yso:p16866',
+                'name' => 'valokuvanäyttelyt'
+            ),
+            105,
+            array(
+                'id' => 'yso:p4484',
+                'name' => 'jazz'
+            ),
+            array(
+                'id' => 'lorem'
+            )
+        );
+
+        $valid_keywords = array_map(
+            function( $v ) { 
+                return $v['name'];
+            }, array_values( $this->keywords ) );
+
+        $event = new Event( $event, $this->dates, $keywords );
+        $post_id = $event->save();
+        $this->post_ids[] = $post_id;
+        $post_tags = get_the_tags( $post_id );
+
+        $this->assertCount( count( $this->keywords ), $post_tags );
+
+        foreach( $post_tags as $term ) {
+            $this->assertContains( $term->name, $valid_keywords );
+        }
 
     }
 

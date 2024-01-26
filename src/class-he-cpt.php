@@ -67,6 +67,7 @@ class HE_CPT {
             'show_ui'               => true,
             'show_in_menu'          => $this->show_in_menu,
             'menu_icon'             => $this->show_in_menu ? $this->menu_icon : null,
+            'taxonomies'            => array( 'post_tag' ),
             'query_var'             => true,
             'rewrite'               => array( 'slug' => $this->slug ),
             'capability_type'       => 'post',

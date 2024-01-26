@@ -64,7 +64,6 @@ class HE_Init {
 
     }
 
-
     private function schedule_cron() {
 
         if ( ! wp_next_scheduled( self::CRON_HOOK ) ) {
