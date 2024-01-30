@@ -95,7 +95,7 @@ class HE_Event {
     function __construct( \stdClass $event, $dates, $keywords = array() ) {
 
         $this->id               = $event->id;
-        $this->name             = $event->name->fi;
+        $this->name             = $event->name->fi ? $event->name->fi : $event->name->en;
         $this->start_time       = strtotime( $event->start_time ) ? $event->start_time : '';
         $this->end_time         = strtotime( $event->end_time ) ? $event->end_time : '';
         $this->description      = $event->description->fi;
