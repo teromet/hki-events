@@ -67,17 +67,21 @@ class HE_Event_Creator {
     }
 
     /**
-     * Create WP_Post for every event received
+     * Create WP_Post for event
      *
      * @param object $event   Event data from Linked Events API
      */
     private function create_event( $event ) {
 
-        $dates =  $event->super_event_type === 'recurring' ? $this->get_sub_event_dates( $event->id ) : array();
-        $keywords = $this->get_event_keywords( $event );
+        if ( $event->name && ( $event->name->fi || $event->name->en )  ) {
 
-        $event = new Event( $event, $dates, $keywords );
-        $post_id = $event->save();
+            $dates =  $event->super_event_type === 'recurring' ? $this->get_sub_event_dates( $event->id ) : array();
+            $keywords = $this->get_event_keywords( $event );
+
+            $event = new Event( $event, $dates, $keywords );
+            $post_id = $event->save();
+
+        }
 
     }
 

@@ -19,7 +19,7 @@ class EventTest extends TestCase {
 
     protected function setUp(): void {
 
-        $this->event = json_decode(json_encode(array(
+        $this->event = json_decode( json_encode( array(
             'id' => 'test:0353',
             'name' => array(
                 'fi' => 'Test event'
@@ -30,7 +30,7 @@ class EventTest extends TestCase {
                 'fi' => 'Lorem ipsum dolor sit amet'
             ),
             'super_event_type' => 'recurring'
-        )));
+        ) ) );
 
         $this->dates = array(
             '2024-01-11T17:00:00Z',
@@ -66,6 +66,7 @@ class EventTest extends TestCase {
             wp_delete_post( $post_id, true );
         }
     }
+
 
     public function test_save_postTypeIsCorrect() {
         $this->assertEquals( HE_POST_TYPE, get_post_type( $this->post_id ) );

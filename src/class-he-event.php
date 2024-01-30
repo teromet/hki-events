@@ -4,6 +4,8 @@ namespace HkiEvents;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
+use HkiEvents\HE_Utils as Utils;
+
 /**
  * HE_Event
  *
@@ -90,18 +92,18 @@ class HE_Event {
     private readonly string $image_alt_text;
 
 
-    function __construct( $event, $dates, $keywords = array() ) {
+    function __construct( \stdClass $event, $dates, $keywords = array() ) {
 
         $this->id               = $event->id;
         $this->name             = $event->name->fi;
-        $this->start_time       = $event->start_time;
-        $this->end_time         = $event->end_time;
+        $this->start_time       = strtotime( $event->start_time ) ? $event->start_time : '';
+        $this->end_time         = strtotime( $event->end_time ) ? $event->end_time : '';
         $this->description      = $event->description->fi;
         $this->recurring        = $event->super_event_type === 'recurring' ? true : false;
         $this->dates            = $dates;
         $this->keywords         = $keywords;
-        $this->image_url        = !empty( $event->images ) && !empty( $event->images[0]->url ) ?  $event->images[0]->url : '';
-        $this->image_alt_text   = !empty( $event->images ) && !empty( $event->images[0]->alt_text ) ?  $event->images[0]->alt_text : '';
+        $this->image_url        = ! empty( $event->images ) && ! empty( $event->images[0]->url ) ?  $event->images[0]->url : '';
+        $this->image_alt_text   = ! empty( $event->images ) && ! empty( $event->images[0]->alt_text ) ?  $event->images[0]->alt_text : '';
 
     }
 
@@ -118,7 +120,7 @@ class HE_Event {
 
         $existing_id = post_exists( $this->name, '', '', HE_POST_TYPE );
 
-        $this->post_id = wp_insert_post( $this->props_to_args( $existing_id ) );
+        $this->post_id = wp_insert_post( $this->props_to_args( $existing_id ), true );
 
         if( ! is_wp_error( $this->post_id ) && $this->post_id > 0 ) {
 
@@ -138,11 +140,11 @@ class HE_Event {
      */
     private function add_thumbnail() {
 
-        if ( ! empty( $this->image_url ) ) {
-            update_field( 'hki_event_image_url', $this->image_url, $this->post_id );
-        }
-        if ( ! empty( $this->image_alt_text ) ) {
-            update_field( 'hki_event_image_alt_text', $this->image_alt_text, $this->post_id );
+        try {
+            $this->update_event_meta( 'hki_event_image_url', $this->image_url );
+            $this->update_event_meta( 'hki_event_image_alt_text', $this->image_alt_text );
+        } catch ( \Exception $e ) {
+            Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
         }
         
     }
@@ -153,27 +155,29 @@ class HE_Event {
      */
     private function add_dates() {
 
-        if ( ! empty( $this->start_time ) && strtotime( $this->start_time ) ) {
-            update_field( 'hki_event_start_time', $this->start_time, $this->post_id );
-        }
-        if ( ! empty( $this->end_time ) && strtotime( $this->end_time ) ) {
-            update_field( 'hki_event_end_time', $this->end_time, $this->post_id );
-        }
+        try {
 
-        if ( $this->recurring && !empty( $this->dates ) ) {
+            $this->update_event_meta( 'hki_event_start_time', $this->start_time );
+            $this->update_event_meta( 'hki_event_end_time', $this->end_time );
 
-            $dates = array_filter( $this->dates, function( $v ) {
-                return ! empty( $v ) && strtotime( $v );
-            } );
+            if ( $this->recurring && !empty( $this->dates ) ) {
 
-            $date_formatted = implode( ', ', array_map(
-                function( $v ) { 
-                    return date( 'j.n.Y', strtotime( $v ) );
-                }, array_values( $dates ) )
-            );
+                $dates = array_filter( $this->dates, function( $v ) {
+                    return ! empty( $v ) && strtotime( $v );
+                } );
+    
+                $date_formatted = implode( ', ', array_map(
+                    function( $v ) { 
+                        return date( 'j.n.Y', strtotime( $v ) );
+                    }, array_values( $dates ) )
+                );
+    
+                $this->update_event_meta( 'hki_event_dates', $date_formatted );
+    
+            }
 
-            update_field( 'hki_event_dates', $date_formatted, $this->post_id );
-
+        } catch ( \Exception $e ) {
+            Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
         }
 
     }
@@ -196,6 +200,25 @@ class HE_Event {
             wp_set_post_tags( $this->post_id, $tags, false );
 
         }
+
+    }
+
+    /**
+     * Wrapper for update_post_meta
+     * 
+     * @param $meta_name metadata key
+     * @param $meta_value metadata value
+     * @return int|bool Meta ID if the key didn’t exist, true on successful update, false on failure
+     */
+    private function update_event_meta( $meta_name, $meta_value ) {
+
+        $results = update_post_meta( $this->post_id, $meta_name, $meta_value );
+    
+        if ( is_a( $results, 'WP_Error' ) ) {
+            throw new \Exception();
+        }
+    
+        return $results;
 
     }
     
