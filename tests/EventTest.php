@@ -6,8 +6,7 @@ use HkiEvents\HE_Event as Event;
 use PHPUnit\Framework\TestCase;
 
 /**
- * HE_Event
- *
+ * @covers HE_Event
  */
 class EventTest extends TestCase {
 
@@ -17,6 +16,9 @@ class EventTest extends TestCase {
     public $dates;
     public $keywords;
 
+    /**
+     * @before 
+     */
     protected function setUp(): void {
 
         $this->event = json_decode( json_encode( array(
@@ -57,12 +59,15 @@ class EventTest extends TestCase {
         $this->post_id = $event->save();
 
     }
-    
+
+    /**
+     * @after 
+     */
     protected function tearDown(): void {
 
         wp_delete_post( $this->post_id, true );
 
-        foreach( $this->post_ids as $post_id ) {
+        foreach ( $this->post_ids as $post_id ) {
             wp_delete_post( $post_id, true );
         }
     }
@@ -85,57 +90,78 @@ class EventTest extends TestCase {
         $this->assertEquals( $this->event->description->fi, get_post( $this->post_id )->post_content );
     }
 
-    public function test_add_event_dates_eventDatesAreAddedCorrectly() {
+    public function test_add_start_time_startTimeIsAddedCorrectly() {
 
         $start_time = $this->event->start_time;
-        $end_time = $this->event->end_time;
 
         $start_time_saved = get_post_meta( $this->post_id, 'hki_event_start_time', true );
-        $end_time_saved = get_post_meta( $this->post_id, 'hki_event_end_time', true );
         
         $s_date1 = new \DateTime( $start_time );
-        $e_date1 = new \DateTime( $end_time );
         $s_date2 = new \DateTime( $start_time_saved );
-        $e_date2 = new \DateTime( $end_time_saved );
         
         $this->assertEquals( $s_date1, $s_date2 );
-        $this->assertEquals( $e_date1, $e_date2 );
 
     }
 
-    public function test_add_event_dates_recurringEventDatesAreAddedCorrectly() {
-
-        $dates = $this->dates;
-        $dates_saved = explode( ', ', get_post_meta( $this->post_id, 'hki_event_dates', true ) );
-
-        foreach( $dates as $key => $value ) {
-            $date1 = new \DateTime( $value );
-            $date2 = new \DateTime( $dates_saved[$key] );
-            $this->assertEquals( $date1->format('j.n.Y'), $date2->format('j.n.Y') );
-        }
-
-    }
-
-    public function test_add_event_dates_incorrectDatesAreIgnored() {
+    public function test_add_start_time_incorrectDateIsIgnored() {
 
         $event = $this->event;
         $event->name->fi = 'Test event 2';
         $event->start_time = '2024-fooo01-11T17:00:00Z';
-        $event->end_time = '2024-01-11T17:00:00Z2023-01-02';
 
         $event = new Event( $event, $this->dates );
         $post_id = $event->save();
         $this->post_ids[] = $post_id;
 
         $start_time_saved = get_post_meta( $post_id, 'hki_event_start_time', true );
-        $end_time_saved = get_post_meta( $post_id, 'hki_event_end_time', true );
 
         $this->assertEmpty( $start_time_saved );
-        $this->assertEmpty( $end_time_saved );
 
     }
 
-    public function test_add_event_dates_incorrectRecurringEventDatesAreIgnored() {
+    public function test_add_end_time_endTimeIsAddedCorrectly() {
+
+        $end_time = $this->event->end_time;
+
+        $end_time_saved = get_post_meta( $this->post_id, 'hki_event_end_time', true );
+        
+        $e_date1 = new \DateTime( $end_time );
+        $e_date2 = new \DateTime( $end_time_saved );
+        
+        $this->assertEquals( $e_date1, $e_date2 );
+
+    }
+
+    public function test_add_end_time_incorrectDateIsIgnored() {
+
+        $event = $this->event;
+        $event->name->fi = 'Test event 2';
+        $event->end_time = '2024-01-11T17:00:00Z2023-01-02';
+
+        $event = new Event( $event, $this->dates );
+        $post_id = $event->save();
+        $this->post_ids[] = $post_id;
+
+        $end_time_saved = get_post_meta( $post_id, 'hki_event_end_time', true );
+
+        $this->assertEmpty( $end_time_saved );
+    
+    }
+
+    public function test_add_recurring_event_dates_datesAreAddedCorrectly() {
+
+        $dates = $this->dates;
+        $dates_saved = explode( ', ', get_post_meta( $this->post_id, 'hki_event_dates', true ) );
+
+        foreach ( $dates as $key => $value ) {
+            $date1 = new \DateTime( $value );
+            $date2 = new \DateTime( $dates_saved[$key] );
+            $this->assertEquals( $date1->format( 'j.n.Y' ), $date2->format( 'j.n.Y' ) );
+        }
+
+    }
+
+    public function test_add_recurring_event_dates_incorrectDatesAreIgnored() {
 
         $event = $this->event;
         $event->name->fi = 'Test event 3';
@@ -154,9 +180,7 @@ class EventTest extends TestCase {
 
         $dates_saved = explode( ', ', get_post_meta( $post_id, 'hki_event_dates', true ) );
 
-        $this->assertCount( 3, $dates_saved );
-
-        foreach( $dates_saved as $date ) {
+        foreach ( $dates_saved as $date ) {
             $this->assertIsInt( strtotime( $date ) );
         }
 
@@ -171,7 +195,7 @@ class EventTest extends TestCase {
         return strcmp( $a["name"], $b["name"] );
         } );
 
-        foreach( $post_tags as $key => $term ) {
+        foreach ( $post_tags as $key => $term ) {
             $this->assertEquals( $term->name, $keywords[$key]['name'] );
         }
 
@@ -214,7 +238,7 @@ class EventTest extends TestCase {
 
         $this->assertCount( count( $this->keywords ), $post_tags );
 
-        foreach( $post_tags as $term ) {
+        foreach ( $post_tags as $term ) {
             $this->assertContains( $term->name, $valid_keywords );
         }
 

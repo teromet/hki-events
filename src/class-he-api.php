@@ -17,12 +17,12 @@ class HE_API {
     const HE_API_URL = 'https://api.hel.fi/linkedevents/v1/';
     
     /**
-     * Get events. Return an array containing result meta data and events or WP_Error
+     * Get events. Return an object containing events and metadata or only array of events
      * 
      * @param array $params API params
      * @param bool $meta_data Include meta data in the results
-     *
-     * @return array|WP_Error
+     * @return array|object
+     * @throws Exception If wp_remote_get returns WP_Error
      * 
      */
     private function get_events( $params, $meta_data = true ) {
@@ -33,14 +33,14 @@ class HE_API {
 
         $response = wp_remote_get( $api_query, ['timeout' => 10] );
 
-        if( is_wp_error( $response ) ) {
-            return new \WP_Error( 'api error', __( 'API Error', 'hki_events' ) );
+        if ( is_wp_error( $response ) ) {
+            throw new \Exception();
         }
 
         $response_body = wp_remote_retrieve_body( $response );
         $results = json_decode( $response_body );
 
-        if( ! $meta_data ) {
+        if ( ! $meta_data ) {
             $results = $results->data;
         }
 
@@ -49,18 +49,100 @@ class HE_API {
     }
 
     /**
-     * Get upcoming events from the next month. Return array of events or WP_Error
+     * Get upcoming events from the next month. Return array of events
      *
-     * @return array|WP_Error
+     * @return array
      * 
      */
     public function get_upcoming_events() {
 
+        $events = array();
+        $params = $this->get_api_params();
+
+        do {
+
+            try {
+                $results = $this->get_events( $params );
+
+                if ( ! empty( $results ) && ! empty( $results->data ) ) {
+                    $events = array_merge( $events, $results->data );
+                    $params['page'] = $params['page'] + 1;
+                }
+
+            } catch ( \Exception $e ) {
+                Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
+            }
+
+        } while ( $results->meta->next );
+
+        return $events;
+
+    }
+
+    /**
+     * Get all subevents for specific superevent. Return array of events
+     * 
+     * @param string $event_id
+     * @return array
+     * 
+     */
+    public function get_sub_events( $event_id ) {
+
+        $events = array();
+
+        // API Params
+        $params = array( 
+            'super_event' => $event_id
+        );
+
+        try {
+            $events = $this->get_events( $params, false );
+        } catch ( \Exception $e ) {
+            Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
+        }
+
+        return $events;
+
+    }
+
+    /**
+     * Get keyword
+     * 
+     * @param string $keyword_id Linked Events API Keyword ID
+     * @return object keyword data
+     * @throws Exception If wp_remote_get returns WP_Error
+     * 
+     */
+    public function get_keyword( $keyword_id ) {
+
+        $api_query = self::HE_API_URL.'keyword/'.$keyword_id;
+
+        Utils::log( 'query-log', 'query: '.urldecode( $api_query ) );
+
+        $response = wp_remote_get( $api_query, ['timeout' => 10] );
+
+        if ( is_wp_error( $response ) ) {
+            throw new \Exception();
+        }
+
+        $response_body = wp_remote_retrieve_body( $response );
+        $keyword = json_decode( $response_body );
+
+        return $keyword;
+
+    }
+
+    /**
+     * Create an array for Linked Events API params
+     * 
+     * @return array api params
+     * 
+     */
+    private function get_api_params() {
+
         require_once( HE_DIR . '/inc/api-config.php' );
 
         $page = 1;
-        $events = array();
-
         $dt = new \DateTime( 'now', new \DateTimeZone( 'Europe/Helsinki' ) );
         $time = $dt->getTimestamp();
         $end = date( 'Y-m-d', strtotime( '+1 month', $time ) );
@@ -77,67 +159,7 @@ class HE_API {
             'page' => $page
         );
 
-        do {
-
-            $results = $this->get_events( $params );
-
-            if( ! empty( $results ) && ! empty( $results->data ) ) {
-                $events = array_merge( $events, $results->data );
-                $params['page'] = $params['page'] + 1;
-            }
-
-
-        } while ( $results->meta->next );
-
-        return $events;
-
-    }
-
-    /**
-     * Get all subevents for specific superevent. Return array of events or WP_Error
-     * 
-     * @param string $event_id
-     * 
-     * @return array|WP_Error
-     * 
-     */
-    public function get_sub_events( $event_id ) {
-
-        // API Params
-        $params = array( 
-            'super_event' => $event_id
-        );
-
-        $events = $this->get_events( $params, false );
-
-        return $events;
-
-    }
-
-    /**
-     * Get keyword. Return keyword data or WP_Error
-     * 
-     * @param string $keyword_id Linked Events API Keyword ID
-     *
-     * @return object|WP_Error
-     * 
-     */
-    public function get_keyword( $keyword_id ) {
-
-        $api_query = self::HE_API_URL.'keyword/'.$keyword_id;
-
-        Utils::log( 'query-log', 'query: '.urldecode( $api_query ) );
-
-        $response = wp_remote_get( $api_query, ['timeout' => 10] );
-
-        if( is_wp_error( $response ) ) {
-            return new \WP_Error( 'api error', __( 'API Error', 'hki_events' ) );
-        }
-
-        $response_body = wp_remote_retrieve_body( $response );
-        $keyword = json_decode( $response_body );
-
-        return $keyword;
+        return $params;
 
     }
 

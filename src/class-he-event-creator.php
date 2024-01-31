@@ -51,10 +51,10 @@ class HE_Event_Creator {
 
         $events = $this->api->get_upcoming_events();
 
-        if( $events ) {
+        if ( $events ) {
             foreach ( $events as $event ) {
                 // Skip events with no start time and test events
-                if( ! $event->start_time || str_contains( strtolower( $event->name->fi ), 'testitapahtuma' ) ) {
+                if ( ! $event->start_time || str_contains( strtolower( $event->name->fi ), 'testitapahtuma' ) ) {
                     continue;
                 }      
                 $this->create_event( $event );
@@ -97,7 +97,7 @@ class HE_Event_Creator {
 
         $sub_events = $this->api->get_sub_events( $event_id );
 
-        if( $sub_events ) {
+        if ( $sub_events ) {
             foreach ( $sub_events as $event ) {
                 $dates[] = $event->start_time;
             }
@@ -117,13 +117,13 @@ class HE_Event_Creator {
 
         $keywords = array();
 
-        if( ! empty( $event->keywords ) ) {
+        if ( ! empty( $event->keywords ) ) {
 
             foreach ( $event->keywords as $keyword ) {
 
                 $keyword_id = basename( $keyword->{'@id'} );
 
-                if( str_contains( $keyword_id, 'yso' ) ) {  
+                if ( str_contains( $keyword_id, 'yso' ) ) {  
 
                     $keyword_data =  $this->get_keyword_data( $keyword_id );
                     $keywords[] = $keyword_data;
@@ -147,19 +147,21 @@ class HE_Event_Creator {
 
         $keyword = $this->keyword_exists( $keyword_id, $this->keywords );
 
-        if( ! $keyword ) {
-            $keyword_api = $this->api->get_keyword( $keyword_id );
+        if ( ! $keyword ) {
+            try {
+                $keyword_api = $this->api->get_keyword( $keyword_id );
 
-            if( ! is_wp_error( $keyword_api ) ) {
                 $keyword = array(
                     'id' => $keyword_api->id,
                     'name' => $keyword_api->name->fi
                 );
 
-                if( ! $this->keyword_exists( $keyword['id'], $this->new_keywords ) ) {
+                if ( ! $this->keyword_exists( $keyword['id'], $this->new_keywords ) ) {
                     $this->new_keywords[] = $keyword;
                 }
 
+            } catch ( \Exception $e ) {
+                Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
             }
         }
 
@@ -195,7 +197,7 @@ class HE_Event_Creator {
      */
     private function get_keywords_json() {
 
-        if( ! file_exists( HE_DIR . '/inc/keywords.json' ) ) {
+        if ( ! file_exists( HE_DIR . '/inc/keywords.json' ) ) {
             return null;
         }
 

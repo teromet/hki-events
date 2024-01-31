@@ -7,6 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 use HkiEvents\HE_CPT as CPT;
 use HkiEvents\HE_Event_Creator as Event_Creator;
 use HkiEvents\HE_Settings_Page as Settings_Page;
+use HkiEvents\HE_Utils as Utils;
 
 class HE_Init {
 
@@ -36,11 +37,6 @@ class HE_Init {
 
         // Add menu page
         $settings_page = new Settings_Page();
-
-        // Test importing
-        if( isset($_GET["hki_action"]) && trim($_GET["hki_action"]) == 'import_events') {
-            $this->handle_cron();
-        }
 
         add_filter( 'post_thumbnail_html', array( $this, 'filter_event_thumbnail' ), 10, 3 );
 
@@ -77,6 +73,7 @@ class HE_Init {
 
     public function handle_cron() {
 
+        Utils::log('cron-log', 'Cron executed');
         $event_creator = new Event_Creator();
         $event_creator->get_events();
 
@@ -124,7 +121,7 @@ class HE_Init {
 
         $query = $this->get_event_query();
 
-        if( $query->have_posts() ):
+        if ( $query->have_posts() ):
             ob_start();
             require ( HE_DIR . '/template-parts/event-list.php' );
         else:
@@ -160,8 +157,8 @@ class HE_Init {
             );
 
         $args = array(
-            'post_type' 		=>  HE_POST_TYPE,
-            'meta_key'     	    => 'hki_event_start_time',
+            'post_type'         =>  HE_POST_TYPE,
+            'meta_key'          => 'hki_event_start_time',
             'orderby'           => 'meta_value',
             'order'             => 'ASC',
             'posts_per_page' 	=>  -1,

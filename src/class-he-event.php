@@ -119,13 +119,15 @@ class HE_Event {
         }
 
         $existing_id = post_exists( $this->name, '', '', HE_POST_TYPE );
-
         $this->post_id = wp_insert_post( $this->props_to_args( $existing_id ), true );
 
-        if( ! is_wp_error( $this->post_id ) && $this->post_id > 0 ) {
+        if ( ! is_wp_error( $this->post_id ) && $this->post_id > 0 ) {
 
-            $this->add_thumbnail();
-            $this->add_dates();
+            $this->add_image_url();
+            $this->add_image_alt_text();
+            $this->add_start_time();
+            $this->add_end_time();
+            $this->add_recurring_event_dates();
             $this->add_tags();
 
         }
@@ -135,13 +137,26 @@ class HE_Event {
     }
 
     /**
-     * Add post thumbnail from url
+     * Add post image url
      *
      */
-    private function add_thumbnail() {
+    private function add_image_url() {
 
         try {
             $this->update_event_meta( 'hki_event_image_url', $this->image_url );
+        } catch ( \Exception $e ) {
+            Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
+        }
+        
+    }
+
+    /**
+     * Add post image alt text
+     *
+     */
+    private function add_image_alt_text() {
+
+        try {
             $this->update_event_meta( 'hki_event_image_alt_text', $this->image_alt_text );
         } catch ( \Exception $e ) {
             Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
@@ -150,15 +165,40 @@ class HE_Event {
     }
 
     /**
-     * Add or update event dates
+     * Add event start time
      * 
      */
-    private function add_dates() {
+    private function add_start_time() {
 
         try {
-
             $this->update_event_meta( 'hki_event_start_time', $this->start_time );
+        } catch ( \Exception $e ) {
+            Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
+        }
+
+    }
+
+    /**
+     * Add event end time
+     * 
+     */
+    private function add_end_time() {
+
+        try {
             $this->update_event_meta( 'hki_event_end_time', $this->end_time );
+        } catch ( \Exception $e ) {
+            Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
+        }
+
+    }
+
+    /**
+     * Add recurring event dates
+     * 
+     */
+    private function add_recurring_event_dates() {
+
+        try {
 
             if ( $this->recurring && !empty( $this->dates ) ) {
 
@@ -192,14 +232,38 @@ class HE_Event {
 
             $tags = array_map(
                 function( $v ) { 
-                    if( is_array( $v ) && array_key_exists( 'name', $v ) ) {
+                    if ( is_array( $v ) && array_key_exists( 'name', $v ) ) {
                         return $v['name'];
                     }     
                 }, array_values( $this->keywords ) );
     
-            wp_set_post_tags( $this->post_id, $tags, false );
+            try {
+                $this->set_event_tags( $tags );
+            } catch ( \Exception $e ) {
+                Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
+            }
 
         }
+
+    }
+
+    /**
+     * Wrapper for wp_set_post_tags
+     * 
+     * @param string|array $tags
+     * @return array|false Array of term taxonomy IDs or false. 
+     * 
+     * @throws Exception If wp_set_post_tags returns WP_Error
+     */
+    private function set_event_tags( $tags ) {
+
+        $results = wp_set_post_tags( $this->post_id, $tags, false );
+    
+        if ( is_a( $results, 'WP_Error' ) ) {
+            throw new \Exception();
+        }
+    
+        return $results;
 
     }
 
@@ -209,6 +273,8 @@ class HE_Event {
      * @param $meta_name metadata key
      * @param $meta_value metadata value
      * @return int|bool Meta ID if the key didn’t exist, true on successful update, false on failure
+     * 
+     * @throws Exception If update_post_meta returns WP_Error
      */
     private function update_event_meta( $meta_name, $meta_value ) {
 

@@ -59,7 +59,7 @@ class HE_Utils {
         $filename         = basename( $unique_file_name ); // Create image file name
 
         // Early exit if no data or attachment with this name already exists
-        if( ! $image_data || attachment_url_to_postid( $upload_dir['url'].'/'.$image_name ) === $post_id ) {
+        if ( ! $image_data || attachment_url_to_postid( $upload_dir['url'].'/'.$image_name ) === $post_id ) {
             return;
         }
 
