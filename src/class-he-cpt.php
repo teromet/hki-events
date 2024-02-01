@@ -18,6 +18,7 @@ class HE_CPT {
     private $is_public;
     private $show_in_menu;
     private $menu_icon;
+    private $taxonomies;
 
     /**
      * Constructor
@@ -35,6 +36,7 @@ class HE_CPT {
         $this->is_public = $attr['is_public'];
         $this->show_in_menu = $attr['show_in_menu'];
         $this->menu_icon = $attr['menu_icon'];
+        $this->taxonomies = $attr['taxonomies'];
 
     }
 
@@ -67,7 +69,7 @@ class HE_CPT {
             'show_ui'               => true,
             'show_in_menu'          => $this->show_in_menu,
             'menu_icon'             => $this->show_in_menu ? $this->menu_icon : null,
-            'taxonomies'            => array( 'post_tag' ),
+            'taxonomies'            => $this->taxonomies,
             'query_var'             => true,
             'rewrite'               => array( 'slug' => $this->slug ),
             'capability_type'       => 'post',

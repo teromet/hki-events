@@ -189,7 +189,7 @@ class EventTest extends TestCase {
     public function test_add_tags_postTagsAreAddedCorrectly() {
 
         $keywords = $this->keywords;
-        $post_tags = get_the_tags( $this->post_id );
+        $post_tags = get_the_terms( $this->post_id, HE_TAXONOMY );
 
         usort( $keywords, function( $a, $b ) {
         return strcmp( $a["name"], $b["name"] );
@@ -234,7 +234,7 @@ class EventTest extends TestCase {
         $event = new Event( $event, $this->dates, $keywords );
         $post_id = $event->save();
         $this->post_ids[] = $post_id;
-        $post_tags = get_the_tags( $post_id );
+        $post_tags = get_the_terms( $post_id, HE_TAXONOMY );
 
         $this->assertCount( count( $this->keywords ), $post_tags );
 

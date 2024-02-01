@@ -24,6 +24,8 @@ class HE_Init {
 
         // Create custom post type
         $this->create_post_type();
+        // Create custom taxonomy
+        $this->create_taxonomies();
 
         // Add cron schedule
         add_action( self::CRON_HOOK, array( $this, 'handle_cron' ) );
@@ -55,12 +57,45 @@ class HE_Init {
             'singular_name' => __( 'Tapahtuma', 'hki_events' ),
             'is_public' => true,
             'show_in_menu' => true,
-            'menu_icon' => 'dashicons-groups'
+            'menu_icon' => 'dashicons-groups',
+            'taxonomies' => array( HE_TAXONOMY )
         );
 
         $cpt = new CPT( $cpt_args );
         $cpt->register();
 
+    }
+
+    public function create_taxonomies() {
+
+        $labels = array(
+            'name' => _x( 'Tags', 'taxonomy general name' ),
+            'singular_name' => _x( 'Tag', 'taxonomy singular name' ),
+            'search_items' =>  __( 'Search Tags' ),
+            'popular_items' => __( 'Popular Tags' ),
+            'all_items' => __( 'All Tags' ),
+            'parent_item' => null,
+            'parent_item_colon' => null,
+            'edit_item' => __( 'Edit Tag' ), 
+            'update_item' => __( 'Update Tag' ),
+            'add_new_item' => __( 'Add New Tag' ),
+            'new_item_name' => __( 'New Tag Name' ),
+            'separate_items_with_commas' => __( 'Separate tags with commas' ),
+            'add_or_remove_items' => __( 'Add or remove tags' ),
+            'choose_from_most_used' => __( 'Choose from the most used tags' ),
+            'menu_name' => __( 'Tags' ),
+        ); 
+
+        register_taxonomy( HE_TAXONOMY, HE_POST_TYPE, array(
+            'hierarchical' => false,
+            'labels' => $labels,
+            'show_ui' => true,
+            'show_admin_column' => true,
+            'update_count_callback' => '_update_post_term_count',
+            'query_var' => true,
+            'rewrite' => array( 'slug' => 'tag' )
+        ) );
+    
     }
 
     private function schedule_cron() {
@@ -89,8 +124,9 @@ class HE_Init {
             $alt_str = !empty ( $alt ) ? 'alt="'.$alt.'"' : '';
 
             if ( $src ) {
-                $html = '<img src="' . $src . '" '.$alt_str.'>';
+                $html = '<img src="' . $src . '" '.$alt_str.' loading="lazy">';
             }
+
         }
 
         return $html;
@@ -123,6 +159,7 @@ class HE_Init {
 
         if ( $query->have_posts() ):
             ob_start();
+            require ( HE_DIR . '/template-parts/event-list-filters.php' );
             require ( HE_DIR . '/template-parts/event-list.php' );
         else:
             echo '<div class="no-posts">'.__('Lue lisää', 'hki_events' ).'</div>';
@@ -168,5 +205,43 @@ class HE_Init {
         return new \WP_Query( $args );
 
     }
-      
+
+    /**
+     * Get all post_tag terms
+     * 
+     * @return WP_Term[] or false on error
+     */
+    private function get_tag_terms() {
+
+        $event_ids = get_posts( array(
+            'post_type'       => HE_POST_TYPE,
+            'fields'          => 'ids', // Only get post IDs
+            'posts_per_page'  => -1
+        ) );
+
+        $terms = wp_get_object_terms( $event_ids, HE_TAXONOMY );
+
+        return ! is_wp_error( $terms ) ? $terms : false;
+
+    }
+
+    /**
+     * Output tag filters HTML
+     * 
+     * @return string html
+     */
+    public function event_tag_filters() {
+
+        $tag_terms  = $this->get_tag_terms();
+        $filters = '';
+
+        if ( ! empty( $tag_terms ) ) {
+            foreach ( $tag_terms as $term ) {
+                $filters .= '<span class="hki-events-list-filters-item">'.$term->name.' ('.$term->count.')</span>';
+            }
+        }
+
+        echo $filters;
+
+    }
 }

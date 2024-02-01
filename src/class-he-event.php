@@ -248,7 +248,7 @@ class HE_Event {
     }
 
     /**
-     * Wrapper for wp_set_post_tags
+     * Wrapper for wp_set_post_terms
      * 
      * @param string|array $tags
      * @return array|false Array of term taxonomy IDs or false. 
@@ -257,7 +257,7 @@ class HE_Event {
      */
     private function set_event_tags( $tags ) {
 
-        $results = wp_set_post_tags( $this->post_id, $tags, false );
+        $results = wp_set_post_terms( $this->post_id, $tags, HE_TAXONOMY, false );
     
         if ( is_a( $results, 'WP_Error' ) ) {
             throw new \Exception();

@@ -30,6 +30,7 @@ class HkiEvents {
         define( 'HE_URL', plugins_url( '', __FILE__ ) );
         define( 'HE_BASENAME', plugin_basename( __FILE__ ) );
         define( 'HE_POST_TYPE', 'hki_event' );
+        define( 'HE_TAXONOMY', 'hki_event_tag' );
         define( 'HE_SHORTCODE', 'hki_events' );
 
         // initialize
