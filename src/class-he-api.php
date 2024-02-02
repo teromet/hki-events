@@ -31,7 +31,7 @@ class HE_API {
 
         Utils::log( 'query-log', 'query: '.urldecode( $api_query ) );
 
-        $response = wp_remote_get( $api_query, ['timeout' => 10] );
+        $response = wp_remote_get( $api_query, array( 'timeout' => 10 ) );
 
         if ( is_wp_error( $response ) ) {
             throw new \Exception();
@@ -74,6 +74,8 @@ class HE_API {
             }
 
         } while ( $results->meta->next );
+
+        update_option( 'hki_events_last_fetched', date( 'Y-m-d' ) );
 
         return $events;
 
@@ -146,6 +148,7 @@ class HE_API {
         $dt = new \DateTime( 'now', new \DateTimeZone( 'Europe/Helsinki' ) );
         $time = $dt->getTimestamp();
         $end = date( 'Y-m-d', strtotime( '+1 month', $time ) );
+        $last_fetched = get_option( 'hki_events_last_fetched' ) ? get_option( 'hki_events_last_fetched' ) : null;
 
         // API Params
         $params = array( 
@@ -156,7 +159,8 @@ class HE_API {
             'start' => get_option( 'hki_events_api_start_date' ) ? get_option( 'hki_events_api_start_date' ) : 'today',
             'sort' => 'end_time',
             'end' => $end,
-            'page' => $page
+            'page' => $page,
+            'last_modified_since' => $last_fetched
         );
 
         return $params;

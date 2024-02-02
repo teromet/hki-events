@@ -116,6 +116,8 @@ class HE_Init {
         $event_creator = new Event_Creator();
         $event_creator->get_events();
 
+        flush_rewrite_rules();
+
     }
 
     public function filter_event_thumbnail( $html, $post_id, $thumbnail_id ) {
