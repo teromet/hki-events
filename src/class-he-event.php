@@ -4,15 +4,16 @@ namespace HkiEvents;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-use HkiEvents\HE_Utils as Utils;
+use HkiEvents\Utils;
+use HkiEvents\Exceptions\EventUpdateException;
 
 /**
- * HE_Event
+ * Event class.
  *
- * Wrapper for single event
+ * Class for single event
  * 
  */
-class HE_Event {
+class Event {
 
     /**
      * The event's Linked Events API ID.
@@ -144,7 +145,7 @@ class HE_Event {
 
         try {
             $this->update_event_meta( 'hki_event_image_url', $this->image_url );
-        } catch ( \Exception $e ) {
+        } catch ( EventUpdateException $e ) {
             Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
         }
         
@@ -158,7 +159,7 @@ class HE_Event {
 
         try {
             $this->update_event_meta( 'hki_event_image_alt_text', $this->image_alt_text );
-        } catch ( \Exception $e ) {
+        } catch ( EventUpdateException $e ) {
             Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
         }
         
@@ -172,7 +173,7 @@ class HE_Event {
 
         try {
             $this->update_event_meta( 'hki_event_start_time', $this->start_time );
-        } catch ( \Exception $e ) {
+        } catch ( EventUpdateException $e ) {
             Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
         }
 
@@ -186,7 +187,7 @@ class HE_Event {
 
         try {
             $this->update_event_meta( 'hki_event_end_time', $this->end_time );
-        } catch ( \Exception $e ) {
+        } catch ( EventUpdateException $e ) {
             Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
         }
 
@@ -216,7 +217,7 @@ class HE_Event {
     
             }
 
-        } catch ( \Exception $e ) {
+        } catch ( EventUpdateException $e ) {
             Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
         }
 
@@ -239,8 +240,8 @@ class HE_Event {
     
             try {
                 $this->set_event_tags( $tags );
-            } catch ( \Exception $e ) {
-                Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
+            } catch ( EventUpdateException $e ) {
+                Utils::log( 'error', 'Caught exception: ' . $e->getMessage() );
             }
 
         }
@@ -253,14 +254,14 @@ class HE_Event {
      * @param string|array $tags
      * @return array|false Array of term taxonomy IDs or false. 
      * 
-     * @throws Exception If wp_set_post_tags returns WP_Error
+     * @throws EventUpdateException If wp_set_post_terms returns WP_Error
      */
     private function set_event_tags( $tags ) {
 
         $results = wp_set_post_terms( $this->post_id, $tags, HE_TAXONOMY, false );
     
         if ( is_a( $results, 'WP_Error' ) ) {
-            throw new \Exception();
+            throw new EventUpdateException( 'Setting event tags of post ' . $this->id . ' failed: ' . $results->get_error_message() );
         }
     
         return $results;
@@ -272,16 +273,16 @@ class HE_Event {
      * 
      * @param $meta_name metadata key
      * @param $meta_value metadata value
-     * @return int|bool Meta ID if the key didn’t exist, true on successful update, false on failure
+     * @return int|bool Meta ID if the key didn’t exist, true on successful update
      * 
-     * @throws Exception If update_post_meta returns WP_Error
+     * @throws EventUpdateException If update_post_meta returns false
      */
     private function update_event_meta( $meta_name, $meta_value ) {
 
         $results = update_post_meta( $this->post_id, $meta_name, $meta_value );
     
-        if ( is_a( $results, 'WP_Error' ) ) {
-            throw new \Exception();
+        if ( $results === false ) {
+            throw new EventUpdateException( 'Updating meta field ' . $meta_name . ' of post ' . $this->id . ' failed.'  );
         }
     
         return $results;

@@ -4,15 +4,16 @@ namespace HkiEvents;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-use HkiEvents\HE_Utils as Utils;
+use HkiEvents\Utils;
+use HkiEvents\Exceptions\HttpRequestFailedException;
 
 /**
- * HE_API
+ * API class.
  *
  * Provides an access to Linked Events API 
  *
  */
-class HE_API {
+class API {
 
     const HE_API_URL = 'https://api.hel.fi/linkedevents/v1/';
     
@@ -22,7 +23,7 @@ class HE_API {
      * @param array $params API params
      * @param bool $meta_data Include meta data in the results
      * @return array|object
-     * @throws Exception If wp_remote_get returns WP_Error
+     * @throws HttpRequestFailedException If wp_remote_get returns WP_Error
      * 
      */
     private function get_events( $params, $meta_data = true ) {
@@ -33,8 +34,10 @@ class HE_API {
 
         $response = wp_remote_get( $api_query, array( 'timeout' => 10 ) );
 
+        Utils::log( 'tests', print_r ( $response, true ) );
+
         if ( is_wp_error( $response ) ) {
-            throw new \Exception();
+            throw new HttpRequestFailedException( 'Http request to following endpoint failed: '.urldecode( $api_query ) );
         }
 
         $response_body = wp_remote_retrieve_body( $response );
@@ -69,13 +72,13 @@ class HE_API {
                     $params['page'] = $params['page'] + 1;
                 }
 
-            } catch ( \Exception $e ) {
+            } catch ( HttpRequestFailedException $e ) {
                 Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
             }
 
         } while ( $results->meta->next );
 
-        update_option( 'hki_events_last_fetched', date( 'Y-m-d' ) );
+        update_option( 'hki_events_api_last_fetched', date( 'Y-m-d' ) );
 
         return $events;
 
@@ -99,7 +102,7 @@ class HE_API {
 
         try {
             $events = $this->get_events( $params, false );
-        } catch ( \Exception $e ) {
+        } catch ( HttpRequestFailedException $e ) {
             Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
         }
 
@@ -112,7 +115,7 @@ class HE_API {
      * 
      * @param string $keyword_id Linked Events API Keyword ID
      * @return object keyword data
-     * @throws Exception If wp_remote_get returns WP_Error
+     * @throws HttpRequestFailedException If wp_remote_get returns WP_Error
      * 
      */
     public function get_keyword( $keyword_id ) {
@@ -124,7 +127,7 @@ class HE_API {
         $response = wp_remote_get( $api_query, ['timeout' => 10] );
 
         if ( is_wp_error( $response ) ) {
-            throw new \Exception();
+            throw new HttpRequestFailedException( 'Http request to following endpoint failed: '.urldecode( $api_query ) );
         }
 
         $response_body = wp_remote_retrieve_body( $response );
@@ -148,7 +151,7 @@ class HE_API {
         $dt = new \DateTime( 'now', new \DateTimeZone( 'Europe/Helsinki' ) );
         $time = $dt->getTimestamp();
         $end = date( 'Y-m-d', strtotime( '+1 month', $time ) );
-        $last_fetched = get_option( 'hki_events_last_fetched' ) ? get_option( 'hki_events_last_fetched' ) : null;
+        $last_fetched = get_option( 'hki_events_api_last_fetched' ) ? get_option( 'hki_events_api_last_fetched' ) : null;
 
         // API Params
         $params = array( 

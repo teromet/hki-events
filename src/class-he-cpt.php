@@ -4,7 +4,13 @@ namespace HkiEvents;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-class HE_CPT {
+/**
+ * CPT class.
+ * 
+ * Class for registering new custom post types
+ *
+ */
+class CPT {
 
     /**
      * @var string

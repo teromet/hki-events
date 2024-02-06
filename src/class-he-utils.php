@@ -8,13 +8,13 @@ use DateTime;
 use DateTimeZone;
 
 /**
- * HE_Utils
+ * Utils class.
  *
- * Helper class
+ * Helper functions
  * 
  * @package HkiEvents
  */
-class HE_Utils {
+class Utils {
 
     /**
      * Write message to a log file

@@ -4,16 +4,16 @@ namespace HkiEvents;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-use HkiEvents\HE_API as Api;
-use HkiEvents\HE_Event as Event;
+use HkiEvents\API;
+use HkiEvents\Event;
 
 /**
- * HE_Event_Creator
+ * EventCreator class.
  *
  * Creates Event objects from API Source
  *
  */
-class HE_Event_Creator {
+class EventCreator {
 
     /**
      * The API wrapper object
@@ -52,6 +52,7 @@ class HE_Event_Creator {
         $events = $this->api->get_upcoming_events();
 
         if ( $events ) {
+            
             foreach ( $events as $event ) {
                 // Skip events with no start time and test events
                 if ( ! $event->start_time || str_contains( strtolower( $event->name->fi ), 'testitapahtuma' ) ) {
@@ -160,7 +161,7 @@ class HE_Event_Creator {
                     $this->new_keywords[] = $keyword;
                 }
 
-            } catch ( \Exception $e ) {
+            } catch ( \HttpRequestFailedException $e ) {
                 Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
             }
         }

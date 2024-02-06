@@ -2,11 +2,11 @@
 
 namespace HkiEvents;
 
-use HkiEvents\HE_Event as Event;
+use HkiEvents\Event;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers HE_Event
+ * @covers HkiEvents\Event
  */
 class EventTest extends TestCase {
 

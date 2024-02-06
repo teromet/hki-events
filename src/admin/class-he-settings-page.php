@@ -1,18 +1,19 @@
 <?php
 
-namespace HkiEvents;
+namespace HkiEvents\Admin;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-use HkiEvents\HE_Admin_Page as Admin_Page;
+use HkiEvents\Admin\AdminPage;
 
 /**
- * HE_Admin_Page
+ * SettingsPage class.
  *
  * Custom settings page to Admin Menu
+ * 
  *
  */
-class HE_Settings_Page extends Admin_Page {
+class SettingsPage extends AdminPage {
 
     protected function get_slug() {
         return 'hki_events_settings';

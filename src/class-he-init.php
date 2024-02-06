@@ -4,12 +4,18 @@ namespace HkiEvents;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-use HkiEvents\HE_CPT as CPT;
-use HkiEvents\HE_Event_Creator as Event_Creator;
-use HkiEvents\HE_Settings_Page as Settings_Page;
-use HkiEvents\HE_Utils as Utils;
+use HkiEvents\CPT;
+use HkiEvents\EventCreator;
+use HkiEvents\Utils;
+use HkiEvents\Admin\SettingsPage;
 
-class HE_Init {
+/**
+ * Init class.
+ *
+ * Enabling plugin functionality via WordPress hook system. Registering custom post types and taxonomies.
+ * 
+ */
+class Init {
 
     const CRON_HOOK = 'hki_events_cron';
 
@@ -17,9 +23,6 @@ class HE_Init {
         add_action( 'init', array( $this, 'initialize' ) );
     }
 
-    /**
-     * Initialize classes and other WP hooks
-     */
     public function initialize() {
 
         // Create custom post type
@@ -38,7 +41,7 @@ class HE_Init {
         add_shortcode( 'hki_events', array( $this, 'shortcode' ) );
 
         // Add menu page
-        $settings_page = new Settings_Page();
+        $settings_page = new SettingsPage();
 
         add_filter( 'post_thumbnail_html', array( $this, 'filter_event_thumbnail' ), 10, 3 );
 
@@ -52,9 +55,9 @@ class HE_Init {
 
         $cpt_args = array(
             'type' => HE_POST_TYPE,
-            'slug' => 'tapahtumat',
-            'name' => __( 'Tapahtumat', 'hki_events' ),
-            'singular_name' => __( 'Tapahtuma', 'hki_events' ),
+            'slug' => 'events',
+            'name' => __( 'Events', 'hki_events' ),
+            'singular_name' => __( 'Event', 'hki_events' ),
             'is_public' => true,
             'show_in_menu' => true,
             'menu_icon' => 'dashicons-groups',
@@ -113,7 +116,7 @@ class HE_Init {
     public function handle_cron() {
 
         Utils::log('cron-log', 'Cron executed');
-        $event_creator = new Event_Creator();
+        $event_creator = new EventCreator();
         $event_creator->get_events();
 
         flush_rewrite_rules();

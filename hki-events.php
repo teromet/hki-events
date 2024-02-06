@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Plugin Name: Helsinki tapahtumat
+ * Plugin Name: Helsinki Events
  * Plugin URI: 
- * Description: 
+ * Description: Import events from Linked Events (common event database for all Helsinki city divisions).
  * Version: 0.1
  * Author: Tero Metsänen
  **/
@@ -34,7 +34,7 @@ class HkiEvents {
         define( 'HE_SHORTCODE', 'hki_events' );
 
         // initialize
-        $init = new HE_Init();
+        $init = new Init();
         $init->hook_into_wp();
 
     }
