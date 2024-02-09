@@ -1,7 +1,7 @@
 Helsinki Events
 =========================
 
-A WordPress integration to [Linked Events API](api.hel.fi/linkedevents/v1/).
+A WordPress integration to [Linked Events API](https://api.hel.fi/linkedevents/v1/).
 
 ## Description
 
