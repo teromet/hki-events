@@ -5,9 +5,9 @@ namespace HkiEvents\Admin;
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
- * AdminPage class.
+ * AdminPage base class.
  * 
- * TODO: Create classes for Sections and Fields
+ * This section is heavily inspired by https://pressidium.com/blog/oop-wordpress-plugin-object-oriented-programming-overview-tutorial/ as of Feb 2024
  * 
  */
 abstract class AdminPage {
@@ -22,26 +22,24 @@ abstract class AdminPage {
 
     }
 
-    protected function get_page_title() {
-        return __( 'Helsinki Events', 'hki_events' );
-    }
-
-    protected function get_menu_title() {
-        return __( 'Helsinki Events', 'hki_events' );
-    }
-
-    protected function get_capability() {
-        return 'manage_options';
-    }
-
     abstract protected function get_slug();
+    abstract protected function register_settings();
+    abstract protected function get_page_title();
+    abstract protected function get_menu_title();
+    abstract protected function get_capability();
+    abstract protected function get_position();
 
+    /**
+     * Return the menu icon to be used for this menu.
+     *
+     * @link https://developer.wordpress.org/resource/dashicons/
+     *
+     * @return string
+     */
     protected function get_icon_url() {
         return 'dashicons-admin-generic';
     }
-    protected function get_position() {
-        return 90;
-    }
+
 
     /**
      * Add admin page as top-menu item
@@ -75,56 +73,6 @@ abstract class AdminPage {
             </form>
         </div>
 
-        <?php
-    }
-
-    public function register_settings() {
-
-        register_setting( $this->get_slug(), 'hki_events_api_start_time' );
-        register_setting( $this->get_slug(), 'hki_events_api_last_fetched' );
-
-        add_settings_section( 
-            'hki_events_settings_api_params', 
-            __( 'Linked Events API parameters', 'hki-events-settings-item-sub' ), 
-            array( $this, 'render_section' ), 
-            $this->get_slug()
-        );
-
-        add_settings_field( 
-            'api_start_time', 
-            __( 'Start time:', 'hki-events-settings-item-sub' ),
-            array( $this, 'render_field_start_time' ), 
-            $this->get_slug(),
-            'hki_events_settings_api_params'
-        );
-
-        add_settings_field( 
-            'api_last_fetched', 
-            __( 'Last fetched:', 'hki-events-settings-item-sub' ),
-            array( $this, 'render_field_last_fetched' ), 
-            $this->get_slug(),
-            'hki_events_settings_api_params'
-        );
-
-    }
-
-    public function render_section() {
-        ?>
-        <h2><?php _e( '', 'hki-events-settings-item-sub' ); ?></h2>
-        <?php
-    }
-
-    public function render_field_start_time() {
-        $stored_option = get_option( 'hki_events_api_start_time' );
-        ?>
-        <input type="text" name="hki_events_api_start_time" value="<?php echo $stored_option; ?>" />
-        <?php
-    }
-
-    public function render_field_last_fetched() {
-        $stored_option = get_option( 'hki_events_api_last_fetched' );
-        ?>
-        <input type="text" name="hki_events_api_last_fetched" value="<?php echo $stored_option; ?>" />
         <?php
     }
     
