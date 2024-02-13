@@ -147,7 +147,7 @@ class Field {
                         $element['type'],         
                         array(
                             'label' => $element['label'],
-                            'name' => $element['name'] ? $element['name'] : $this->field_id.'_'.$key,
+                            'name' => $element['name'] ? $element['name'] : $this->field_id,
                             'value' => $element['value']
                             ) 
                     );
@@ -155,7 +155,7 @@ class Field {
                 }
                 
             }
-            
+
         }
 
     }

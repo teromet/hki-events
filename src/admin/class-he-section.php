@@ -111,9 +111,13 @@ class Section {
      */
     public function add_field( $field_id, $section_id, $page, $options ) {
 
-        $field = new Field( $field_id, $section_id, $page, $options );
+        if ( ! empty ( $field_id ) && ! empty ( $options['id'] ) && ! empty ( $options['label'] ) ) {
 
-        $this->fields[] = $field;
+            $field = new Field( $field_id, $section_id, $page, $options );
+
+            $this->fields[] = $field;
+
+        }
         
     }
 
