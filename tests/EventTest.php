@@ -2,7 +2,7 @@
 
 namespace HkiEvents;
 
-use HkiEvents\Event;
+use HkiEvents\Event\Event;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -10,10 +10,10 @@ use PHPUnit\Framework\TestCase;
  */
 class EventTest extends TestCase {
 
+    public $id;
     public $post_id;
     public $post_ids = array();
     public $event;
-    public $dates;
     public $keywords;
 
     /**
@@ -34,12 +34,6 @@ class EventTest extends TestCase {
             'super_event_type' => 'recurring'
         ) ) );
 
-        $this->dates = array(
-            '2024-01-11T17:00:00Z',
-            '2024-01-21T17:00:00Z',
-            '2024-01-25T17:00:00Z'
-        );
-
         $this->keywords = array(
             array(
                 'id' => 'yso:p10649',
@@ -55,7 +49,7 @@ class EventTest extends TestCase {
             )
         );
 
-        $event = new Event( $this->event, $this->dates, $this->keywords );
+        $event = new Event( $this->event, $this->keywords );
         $this->post_id = $event->save();
 
     }
@@ -72,7 +66,6 @@ class EventTest extends TestCase {
         }
     }
 
-
     public function test_save_postTypeIsCorrect() {
         $this->assertEquals( HE_POST_TYPE, get_post_type( $this->post_id ) );
     }
@@ -88,6 +81,15 @@ class EventTest extends TestCase {
 
     public function test_save_postContentIsSavedCorrectly() {
         $this->assertEquals( $this->event->description->fi, get_post( $this->post_id )->post_content );
+    }
+
+    public function test_add_id_idIsAddedCorrectly() {
+
+        $id = $this->event->id;
+        $id_saved = get_post_meta( $this->post_id, 'hki_event_linked_events_id', true );
+        
+        $this->assertEquals( $id, $id_saved );
+
     }
 
     public function test_add_start_time_startTimeIsAddedCorrectly() {
@@ -109,7 +111,7 @@ class EventTest extends TestCase {
         $event->name->fi = 'Test event 2';
         $event->start_time = '2024-fooo01-11T17:00:00Z';
 
-        $event = new Event( $event, $this->dates );
+        $event = new Event( $event );
         $post_id = $event->save();
         $this->post_ids[] = $post_id;
 
@@ -138,7 +140,7 @@ class EventTest extends TestCase {
         $event->name->fi = 'Test event 2';
         $event->end_time = '2024-01-11T17:00:00Z2023-01-02';
 
-        $event = new Event( $event, $this->dates );
+        $event = new Event( $event );
         $post_id = $event->save();
         $this->post_ids[] = $post_id;
 
@@ -146,44 +148,6 @@ class EventTest extends TestCase {
 
         $this->assertEmpty( $end_time_saved );
     
-    }
-
-    public function test_add_recurring_event_dates_datesAreAddedCorrectly() {
-
-        $dates = $this->dates;
-        $dates_saved = explode( ', ', get_post_meta( $this->post_id, 'hki_event_dates', true ) );
-
-        foreach ( $dates as $key => $value ) {
-            $date1 = new \DateTime( $value );
-            $date2 = new \DateTime( $dates_saved[$key] );
-            $this->assertEquals( $date1->format( 'j.n.Y' ), $date2->format( 'j.n.Y' ) );
-        }
-
-    }
-
-    public function test_add_recurring_event_dates_incorrectDatesAreIgnored() {
-
-        $event = $this->event;
-        $event->name->fi = 'Test event 3';
-        $dates = array(
-            '2024-01-11T17:00:00Z',
-            '',
-            'lorem ipsum',
-            '2024-01-21T17:00:00Z',
-            '2024-01-23fooT17:00:00Z',
-            '2024-01-25T17:00:00Z'
-        );
-
-        $event = new Event( $event, $dates );
-        $post_id = $event->save();
-        $this->post_ids[] = $post_id;
-
-        $dates_saved = explode( ', ', get_post_meta( $post_id, 'hki_event_dates', true ) );
-
-        foreach ( $dates_saved as $date ) {
-            $this->assertIsInt( strtotime( $date ) );
-        }
-
     }
 
     public function test_add_tags_postTagsAreAddedCorrectly() {
@@ -231,7 +195,7 @@ class EventTest extends TestCase {
                 return $v['name'];
             }, array_values( $this->keywords ) );
 
-        $event = new Event( $event, $this->dates, $keywords );
+        $event = new Event( $event, $keywords );
         $post_id = $event->save();
         $this->post_ids[] = $post_id;
         $post_tags = get_the_terms( $post_id, HE_TAXONOMY );

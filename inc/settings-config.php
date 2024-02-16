@@ -14,11 +14,11 @@ $settings_sections = array(
                         'label' => '',
                         'name' => '',
                         'value' => array(
-                            'Off'         => 'off',
-                            'Once Hourly' => 'hourly',
-                            'Twice Daily' => 'twicedaily',
-                            'Once Daily' => 'daily',
-                            'Once Weekly' => 'weekly'
+                            'Off'           => 'off',
+                            'Once Hourly'   => 'hourly',
+                            'Twice Daily'   => 'twicedaily',
+                            'Once Daily'    => 'daily',
+                            'Once Weekly'   => 'weekly'
                         )
                     )
                     ),
@@ -48,6 +48,20 @@ $settings_sections = array(
                     )
                 ),
                 'description' => 'Time span on which the queried events will take place. 1, 2, 3 or 6 months.'
+            ),
+            array(
+                'id' => 'hki_events_free_only',
+                'label' => __( 'Include free events only', 'hki_events' ),
+                'section' => 'hki_events_settings_options',
+                'elements' => array(
+                    array(
+                        'type' => 'CheckboxElement',
+                        'label' => __( '', 'hki_events' ),
+                        'name' => 'free_only',
+                        'value' => ''
+                    )
+                ),
+                'description' => ''
             ),
             array(
                 'id' => 'hki_events_categories',
@@ -147,7 +161,7 @@ $settings_sections = array(
                         'value' => ''
                     )
                 ),
-                'description' => 'Include demographic-specific events. Excluded by default.'
+                'description' => 'Include demographic-specific events. Ignored by default.'
             ),
         )
     )

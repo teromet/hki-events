@@ -38,6 +38,17 @@ class Utils {
     }
 
     /**
+     * Clean string from spaces and special characters except hyphens and colons
+     */
+    public static function clean_string( $string ) {
+
+        $string = str_replace( ' ', '-', $string );
+    
+        return preg_replace( '/[^A-Za-z0-9\-:]/', '', $string );
+
+     }
+
+    /**
      * Uploads an image from remote url and sets as featured image of the new post
      * @see https://gist.github.com/ajskelton/23d4dda9e3b837f408e20b5dc23f6b52
      *

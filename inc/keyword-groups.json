@@ -1,0 +1,259 @@
+[
+    {
+        "name" : "music",
+        "ignored_by_default" : false,
+        "keywords" : [
+            {
+                "id": "yso:p1808",
+                "name": "musiikki"
+            },
+            {
+                "id": "yso:p11185",
+                "name": "konsertit"
+            },
+            {
+                "id": "yso:p20421",
+                "name": "musiikkiklubit"
+            },
+            {
+                "id": "yso:p24765",
+                "name": "musiikkikeikat"
+            },
+            {
+                "id": "yso:p27962",
+                "name": "elävä musiikki"
+            }
+        ]
+    },
+    {
+        "name" : "sports",
+        "ignored_by_default" : false,
+        "keywords" : [
+            {
+                "id": "yso:p965",
+                "name": "urheilu"
+            }
+        ]
+    },
+    {
+        "name" : "visual arts",
+        "ignored_by_default" : false,
+        "keywords" : [
+            {
+                "id": "yso:p5378",
+                "name": "keramiikkataide"
+            },
+            {
+                "id": "yso:p6455",
+                "name": "muotoilu"
+            },
+            {
+                "id": "yso:p2739",
+                "name": "kuvataide"
+            },
+            {
+                "id": "yso:p18749",
+                "name": "valotaide"
+            },
+            {
+                "id": "yso:p10649",
+                "name": "valokuvataide"
+            },
+            {
+                "id": "yso:p16866",
+                "name": "valokuvanäyttelyt"
+            }
+        ]
+    },
+    {
+        "name" : "movies",
+        "ignored_by_default" : false,
+        "keywords" : [
+            {
+                "id": "yso:p1235",
+                "name": "elokuvat"
+            },
+            {
+                "id": "yso:p16327",
+                "name": "elokuvataide"
+            }
+        ]
+    },
+    {
+        "name" : "theatre",
+        "ignored_by_default" : false,
+        "keywords" : [
+            {
+                "id": "yso:p2625",
+                "name": "teatteritaide"
+            },
+            {
+                "id": "yso:p27769",
+                "name": "teatteri-ilmaisu"
+            }
+        ]
+    },
+    {
+        "name" : "history and museums",
+        "ignored_by_default" : false,
+        "keywords" : [
+            {
+                "id": "yso:p8107",
+                "name": "kaupunkihistoria"
+            },
+            {
+                "id": "yso:p10041",
+                "name": "kulttuurihistorialliset museot"
+            },
+            {
+                "id": "yso:p1780",
+                "name": "historia"
+            },
+            {
+                "id": "yso:p18452",
+                "name": "kulttuurihistoria"
+            },
+            {
+                "id": "yso:p4934",
+                "name": "museot"
+            },
+            {
+                "id": "yso:p11345",
+                "name": "kotimuseot"
+            }
+        ]
+    },
+    {
+        "name" : "literature",
+        "ignored_by_default" : false,
+        "keywords" : [
+            {
+                "id": "yso:p8113",
+                "name": "kirjallisuus"
+            },
+            {
+                "id": "yso:p17413",
+                "name": "kirjallisuuspiirit"
+            },
+            {
+                "id": "yso:p20073",
+                "name": "kirjavinkkaus"
+            }
+        ]
+    },
+    {
+        "name" : "dance",
+        "ignored_by_default" : false,
+        "keywords" : [
+            {
+                "id": "yso:p1278",
+                "name": "tanssi"
+            },
+            {
+                "id": "yso:p10217",
+                "name": "tanssiteokset"
+            },
+            {
+                "id": "yso:p3984",
+                "name": "tanssitapahtumat"
+            }
+        ]
+    },
+    {
+        "name" : "fitness and well-being",
+        "ignored_by_default" : false,
+        "keywords" : [
+            {
+                "id": "yso:p916",
+                "name": "liikunta"
+            },
+            {
+                "id": "yso:p1947",
+                "name": "hyvinvointi"
+            },
+            {
+                "id": "yso:p2771",
+                "name": "ulkoilu"
+            }
+        ]
+    },
+    {
+        "name" : "children",
+        "ignored_by_default" : true,
+        "keywords" : [
+            {
+                "id": "yso:p13050",
+                "name": "lapsiperheet"
+            },
+            {
+                "id": "yso:p4354",
+                "name": "lapset (ikäryhmät)"
+            }
+        ]
+    },
+    {
+        "name" : "infants",
+        "ignored_by_default" : true,
+        "keywords" : [
+            {
+                "id": "yso:p15937",
+                "name": "vauvat"
+            },
+            {
+                "id": "yso:p20513",
+                "name": "vauvaperheet"
+            }
+        ]
+    },
+    {
+        "name" : "youth",
+        "ignored_by_default" : true,
+        "keywords" : [
+            {
+                "id": "yso:p11617",
+                "name": "nuoret"
+            },
+            {
+                "id": "yso:p16485",
+                "name": "koululaiset"
+            },
+            {
+                "id": "yso:p1925",
+                "name": "nuorisotyö"
+            },
+            {
+                "id": "yso:p20576",
+                "name": "nuorisotoimi"
+            }
+
+        ]
+    },
+    {
+        "name" : "seniors",
+        "ignored_by_default" : true,
+        "keywords" : [
+            {
+                "id": "yso:p2431",
+                "name": "eläkeläiset"
+            },
+            {
+                "id": "yso:p25147",
+                "name": "vanhuspalvelut"
+            },
+            {
+                "id": "yso:p2433",
+                "name": "ikääntyneet"
+            }
+        ]
+    },
+    {
+        "name" : "immigrants",
+        "ignored_by_default" : true,
+        "keywords" : [
+            {
+                "id": "yso:p6165",
+                "name": "maahanmuuttajat"
+            }
+        ]
+    }
+]

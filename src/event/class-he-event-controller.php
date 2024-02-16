@@ -1,26 +1,28 @@
 <?php
 
-namespace HkiEvents;
+namespace HkiEvents\Event;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-use HkiEvents\API;
-use HkiEvents\Event;
+use HkiEvents\Event\EventInterface;
+use HkiEvents\Utils;
 
 /**
- * EventCreator class.
+ * EventController class.
  *
- * Creates Event objects from API Source
- *
+ * Acts as an intermediate layer between the Event class and the EventInterface class.
+ * 
+ * TODO: Move the keyword cache functionality elsewhere
+ * 
  */
-class EventCreator {
+class EventController {
 
     /**
-     * The API wrapper object
+     * EventInterface object
      *
-     * @var object
+     * @var EventInterface
      */
-    private $api;
+    private $event_interface;
 
     /**
      * Keywords that has been saved to a JSON file
@@ -39,7 +41,7 @@ class EventCreator {
 
     function __construct( ) {
 
-        $this->api = new Api();
+        $this->event_interface = new EventInterface();
         $this->keywords = $this->get_keywords_json();
 
     }
@@ -49,7 +51,7 @@ class EventCreator {
      */
     public function get_events() {
 
-        $events = $this->api->get_upcoming_events();
+        $events = $this->event_interface->get_events();
 
         if ( $events ) {
             
@@ -62,6 +64,8 @@ class EventCreator {
             }
 
             $this->save_new_keywords();
+
+            update_option( 'hki_events_last_fetched', date( 'Y-m-d' ) );
 
         }
 
@@ -76,10 +80,9 @@ class EventCreator {
 
         if ( $event->name && ( $event->name->fi || $event->name->en )  ) {
 
-            $dates =  $event->super_event_type === 'recurring' ? $this->get_sub_event_dates( $event->id ) : array();
             $keywords = $this->get_event_keywords( $event );
 
-            $event = new Event( $event, $dates, $keywords );
+            $event = new Event( $event, $keywords );
             $post_id = $event->save();
 
         }
@@ -87,31 +90,10 @@ class EventCreator {
     }
 
     /**
-     * Get sub event dates of an recurring (super) event
-     *
-     * @param string $event_id   Linked Events API event id
-     * @return array Array of sub event dates in ascending order
-     */
-    private function get_sub_event_dates( $event_id ) {
-
-        $dates = array();
-
-        $sub_events = $this->api->get_sub_events( $event_id );
-
-        if ( $sub_events ) {
-            foreach ( $sub_events as $event ) {
-                $dates[] = $event->start_time;
-            }
-        }
-
-        return array_reverse( $dates );
-
-    }
-
-    /**
      * Get event keywords
      *
      * @param object $event Event data from Linked Events API
+     * 
      * @return array $keywords
      */
     private function get_event_keywords( $event ) {
@@ -142,6 +124,7 @@ class EventCreator {
      * Get keyword data (id, name) from API or file
      *
      * @param string $keyword_id Linked Events API keyword ID
+     * 
      * @return array $keyword
      */
     private function get_keyword_data( $keyword_id ) {
@@ -149,21 +132,18 @@ class EventCreator {
         $keyword = $this->keyword_exists( $keyword_id, $this->keywords );
 
         if ( ! $keyword ) {
-            try {
-                $keyword_api = $this->api->get_keyword( $keyword_id );
 
-                $keyword = array(
-                    'id' => $keyword_api->id,
-                    'name' => $keyword_api->name->fi
-                );
+            $keyword_api = $this->event_interface->get_keyword( $keyword_id );
 
-                if ( ! $this->keyword_exists( $keyword['id'], $this->new_keywords ) ) {
-                    $this->new_keywords[] = $keyword;
-                }
+            $keyword = array(
+                'id' => $keyword_api->id,
+                'name' => $keyword_api->name->fi
+            );
 
-            } catch ( \HttpRequestFailedException $e ) {
-                Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
+            if ( ! $this->keyword_exists( $keyword['id'], $this->new_keywords ) ) {
+                $this->new_keywords[] = $keyword;
             }
+
         }
 
         return $keyword;
@@ -175,6 +155,7 @@ class EventCreator {
      *
      * @param string $keyword_id Linked Events API keyword ID
      * @param array array containing keywords (id, name)
+     * 
      * @return array|null $keyword or null if not found
      */
     private function keyword_exists( $keyword_id, $keyword_arr ) {

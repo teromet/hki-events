@@ -1,6 +1,6 @@
 <?php
 
-namespace HkiEvents;
+namespace HkiEvents\Event;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
@@ -10,7 +10,7 @@ use HkiEvents\Exceptions\EventUpdateException;
 /**
  * Event class.
  *
- * Class for single event
+ * Wrapper for single hki_event post
  * 
  */
 class Event {
@@ -64,12 +64,6 @@ class Event {
      */
     private $recurring;
 
-    /**
-     * Event dates
-     *
-     * @var array
-     */
-    private $dates;
 
     /**
      * Event's Linked Events API keywords
@@ -93,7 +87,7 @@ class Event {
     private readonly string $image_alt_text;
 
 
-    function __construct( \stdClass $event, $dates, $keywords = array() ) {
+    function __construct( \stdClass $event, $keywords = array() ) {
 
         $this->id               = $event->id;
         $this->name             = $event->name->fi ? $event->name->fi : $event->name->en;
@@ -101,7 +95,6 @@ class Event {
         $this->end_time         = strtotime( $event->end_time ) ? $event->end_time : '';
         $this->description      = $event->description->fi;
         $this->recurring        = $event->super_event_type === 'recurring' ? true : false;
-        $this->dates            = $dates;
         $this->keywords         = $keywords;
         $this->image_url        = ! empty( $event->images ) && ! empty( $event->images[0]->url ) ?  $event->images[0]->url : '';
         $this->image_alt_text   = ! empty( $event->images ) && ! empty( $event->images[0]->alt_text ) ?  $event->images[0]->alt_text : '';
@@ -119,22 +112,46 @@ class Event {
             require_once( ABSPATH . 'wp-admin/includes/post.php' );
         }
 
-        $existing_id = post_exists( $this->name, '', '', HE_POST_TYPE );
+        $existing_id = $this->event_exists();
         $this->post_id = wp_insert_post( $this->props_to_args( $existing_id ), true );
 
         if ( ! is_wp_error( $this->post_id ) && $this->post_id > 0 ) {
 
-            $this->add_image_url();
-            $this->add_image_alt_text();
-            $this->add_start_time();
-            $this->add_end_time();
-            $this->add_recurring_event_dates();
+            $this->add_id();
+
+            if ( ! empty ( $this->start_time ) ) {
+                $this->add_start_time();
+            }
+            if ( ! empty ( $this->end_time ) ) {
+                $this->add_end_time();
+            }
+            if ( ! empty ( $this->image_url ) ) {
+                $this->add_image_url();
+            }
+            if ( ! empty ( $this->image_alt_text ) ) {
+                $this->add_image_alt_text();
+            }
+
             $this->add_tags();
 
         }
 
         return $this->post_id;
 
+    }
+
+    /**
+     * Add Linked Events id
+     *
+     */
+    private function add_id() {
+
+        try {
+            $this->update_event_meta( 'hki_event_linked_events_id', $this->id );
+        } catch ( EventUpdateException $e ) {
+            Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
+        }
+        
     }
 
     /**
@@ -194,36 +211,6 @@ class Event {
     }
 
     /**
-     * Add recurring event dates
-     * 
-     */
-    private function add_recurring_event_dates() {
-
-        try {
-
-            if ( $this->recurring && !empty( $this->dates ) ) {
-
-                $dates = array_filter( $this->dates, function( $v ) {
-                    return ! empty( $v ) && strtotime( $v );
-                } );
-    
-                $date_formatted = implode( ', ', array_map(
-                    function( $v ) { 
-                        return date( 'j.n.Y', strtotime( $v ) );
-                    }, array_values( $dates ) )
-                );
-    
-                $this->update_event_meta( 'hki_event_dates', $date_formatted );
-    
-            }
-
-        } catch ( EventUpdateException $e ) {
-            Utils::log( 'error', 'Caught exception: '.$e->getMessage() );
-        }
-
-    }
-
-    /**
      * Add event post tags
      * 
      */
@@ -251,17 +238,19 @@ class Event {
     /**
      * Wrapper for wp_set_post_terms
      * 
+     * @throws EventUpdateException If wp_set_post_terms returns WP_Error
+     * 
      * @param string|array $tags
+     * 
      * @return array|false Array of term taxonomy IDs or false. 
      * 
-     * @throws EventUpdateException If wp_set_post_terms returns WP_Error
      */
     private function set_event_tags( $tags ) {
 
         $results = wp_set_post_terms( $this->post_id, $tags, HE_TAXONOMY, false );
     
         if ( is_a( $results, 'WP_Error' ) ) {
-            throw new EventUpdateException( 'Setting event tags of post ' . $this->id . ' failed: ' . $results->get_error_message() );
+            throw new EventUpdateException( 'Setting event tags of post ' . $this->post_id . ' failed: ' . $results->get_error_message() );
         }
     
         return $results;
@@ -271,21 +260,52 @@ class Event {
     /**
      * Wrapper for update_post_meta
      * 
+     * @throws EventUpdateException If update_post_meta returns false
+     * 
      * @param $meta_name metadata key
      * @param $meta_value metadata value
+     * 
      * @return int|bool Meta ID if the key didn’t exist, true on successful update
      * 
-     * @throws EventUpdateException If update_post_meta returns false
      */
     private function update_event_meta( $meta_name, $meta_value ) {
 
         $results = update_post_meta( $this->post_id, $meta_name, $meta_value );
     
         if ( $results === false ) {
-            throw new EventUpdateException( 'Updating meta field ' . $meta_name . ' of post ' . $this->id . ' failed.'  );
+            throw new EventUpdateException( 'Updating meta field ' . $meta_name . ' of post ' . $this->post_id . ' failed.'  );
         }
     
         return $results;
+
+    }
+
+    /**
+     * Check if post with Linked Events id exists. Return the id or false
+     * 
+     * @return integer|false
+     */
+    private function event_exists() {
+
+        $query_args = array(
+            'post_type'  => HE_POST_TYPE,
+            'posts_per_page' => 1,
+            'meta_query' => array(
+                'relation' => 'AND',
+                array(
+                    'key'   => 'hki_event_linked_events_id',
+                    'value' => $this->id
+                )
+            ),
+        );
+
+        $posts = get_posts( $query_args );
+
+        if( ! empty ( $posts ) &&  $posts[0]->post_title == $this->name ) {
+            return $posts[0]->ID;
+        }
+
+        return false;
 
     }
     
@@ -293,6 +313,7 @@ class Event {
      * Create a WP_Post args array
      * 
      * @param int $post_id
+     * 
      * @return array post args
      */
     private function props_to_args( $post_id ) {

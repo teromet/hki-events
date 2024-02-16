@@ -21,6 +21,10 @@ class SettingsPage extends AdminPage {
      */     
     private $sections = array();
 
+    public function after_update() {
+        update_option( 'hki_events_last_fetched', '' );
+    }
+
 
     protected function get_slug() {
         return 'hki_events_settings';

@@ -19,6 +19,7 @@ abstract class AdminPage {
 
         add_action( 'admin_menu', array( $this, 'add_page' ) );
         add_action( 'admin_init', array( $this, 'register_settings' ) );
+        add_action( 'updated_option', array( $this, 'after_update' ) );
 
     }
 
@@ -28,6 +29,8 @@ abstract class AdminPage {
     abstract protected function get_menu_title();
     abstract protected function get_capability();
     abstract protected function get_position();
+
+    abstract public function after_update();
 
     /**
      * Return the menu icon to be used for this menu.

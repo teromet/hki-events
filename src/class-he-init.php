@@ -5,7 +5,7 @@ namespace HkiEvents;
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 use HkiEvents\CPT;
-use HkiEvents\EventCreator;
+use HkiEvents\Event\EventController;
 use HkiEvents\Utils;
 use HkiEvents\Admin\SettingsPage;
 
@@ -33,7 +33,7 @@ class Init {
         // Add cron schedule
         add_action( self::CRON_HOOK, array( $this, 'handle_cron' ) );
         $this->schedule_cron();
-
+        
         // Add assets
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 
@@ -105,24 +105,60 @@ class Init {
     
     }
 
+
+    /**
+     * Schedule the hki_events_cron event.
+     * 
+     * If the import_schedule option is changed, unschedule the previous event and schedule a new.
+     * If the import_schedule option is empty or is not supported (e.g. has value 'off'), unschedule the event and exit.
+     * 
+     */
     private function schedule_cron() {
 
+        $import_schedule        = get_option( 'hki_events_import_schedule' );
+        $supported_schedules    = wp_get_schedules();
+
+        if ( empty ( $import_schedule ) || ! array_key_exists( $import_schedule, $supported_schedules ) ) {
+            $this->unschedule_cron();
+            return;
+        }
+
+        $scheduled_event = wp_get_scheduled_event( self::CRON_HOOK );
+
+        if( $scheduled_event && $scheduled_event->schedule !== $import_schedule ) {
+            $this->unschedule_cron();
+        }
+
         if ( ! wp_next_scheduled( self::CRON_HOOK ) ) {
-          wp_schedule_event( time(), 'daily', self::CRON_HOOK );
+          wp_schedule_event( time(), $import_schedule , self::CRON_HOOK );
         }
 
     }
 
+    /**
+     * Unschedule the cron event
+     */
+    private function unschedule_cron() {
+        $timestamp = wp_next_scheduled( self::CRON_HOOK );
+        wp_unschedule_event( $timestamp, self::CRON_HOOK );
+    }
+
+    /**
+     * Cron hook callback function
+     */
     public function handle_cron() {
 
-        Utils::log('cron-log', 'Cron executed');
-        $event_creator = new EventCreator();
-        $event_creator->get_events();
+        $event_controller = new EventController();
+        $event_controller->get_events();
 
         flush_rewrite_rules();
 
     }
 
+    /**
+     * Use an external image as the post thumbnail
+     * 
+     */
     public function filter_event_thumbnail( $html, $post_id, $thumbnail_id ) {
 
         if ( ! $thumbnail_id ) {
