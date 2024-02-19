@@ -25,7 +25,7 @@ class API {
      * @return stdClass $result
      * 
      */
-    private function get( $api_query ) {
+    private function get( string $api_query ) {
 
         Utils::log( 'query-log', 'query: '.urldecode( $api_query ) );
 
@@ -43,16 +43,21 @@ class API {
     }
 
     /**
-     * Get all items
+     * Get all items or false on error
      * 
      * @param string $url
      * @param array $params
      * 
-     * @return stdClass $result
+     * @return stdClass|false $result
      */
-    public function get_all( $url, $params ) {
+    public function get_all( string $url, array $params ) {
 
         $result = false;
+
+        if( empty( $url ) ) {
+            return $result;
+        }
+
         $api_query = sanitize_url( $url ).'?'.http_build_query( $params );
 
         try {
@@ -66,16 +71,21 @@ class API {
     }
 
     /**
-     * Get item by id
+     * Get item by id or false on error
      * 
      * @param string $url
-     * @param string $id
+     * @param string|int $id
      * 
-     * @return stdClass $result
+     * @return stdClass|false $result
      */
-    public function get_by_id( $url, $id ) {
+    public function get_by_id( string $url, string|int $id ) {
 
         $result = false;
+
+        if( empty( $url ) ) {
+            return $result;
+        }
+
         $api_query = sanitize_url( $url ).Utils::clean_string( $id );
 
         try {
