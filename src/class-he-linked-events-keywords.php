@@ -76,10 +76,17 @@ class LinkedEventsKeywords {
      */
     public function get_params() {
 
-        return array(
-            'keyword' => implode( ",", $this->keywords ),
-            'keyword!' => implode( ",", $this->keywords_to_ignore ),
-        );
+        $params = array();
+
+        if ( ! empty ( $this->keywords ) ) {
+            $params['keyword'] = implode( ",", $this->keywords );
+        }
+
+        if ( ! empty ( $this->keywords_to_ignore ) ) {
+            $params['keyword!'] = implode( ",", $this->keywords_to_ignore );
+        }
+
+        return $params;
 
     }
 

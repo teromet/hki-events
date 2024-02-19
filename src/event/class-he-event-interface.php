@@ -62,7 +62,7 @@ class EventInterface {
         $events = array();
 
         do {
-            $result = $this->api->get_all( self::EVENTS_URL, $params );
+            $result = $this->api->get_all( self::EVENTS_URL, $params->get_params() );
 
             if ( ! empty( $result ) && ! empty( $result->data ) ) {
                 $events = array_merge( $events, $result->data );

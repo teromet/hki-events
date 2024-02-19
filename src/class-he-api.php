@@ -4,7 +4,6 @@ namespace HkiEvents;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-use HkiEvents\LinkedEventsParams;
 use HkiEvents\Utils;
 use HkiEvents\Exceptions\HttpRequestFailedException;
 
@@ -47,14 +46,14 @@ class API {
      * Get all items
      * 
      * @param string $url
-     * @param LinkedEventsParams $params
+     * @param array $params
      * 
      * @return stdClass $result
      */
-    public function get_all( $url, LinkedEventsParams $params ) {
+    public function get_all( $url, $params ) {
 
         $result = false;
-        $api_query = sanitize_url( $url ).'?'.http_build_query( $params->get_params() );
+        $api_query = sanitize_url( $url ).'?'.http_build_query( $params );
 
         try {
             $result = $this->get( $api_query );

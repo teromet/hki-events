@@ -78,7 +78,7 @@ class LinkedEventsParams {
 
         // Other options
         $this->start                    = 'today';
-        $this->end                      = date( 'Y-m-d', strtotime( '+'.intval( $options['end_date'] ).' month', $time ) );
+        $this->end                      = date( 'Y-m-d', strtotime( '+'.intval( $options['time_span'] ).' month', $time ) );
         $this->is_free                  = $options['is_free'];
         $this->hide_recurring_children  = 'true';
         $this->last_modified_since      = $options['last_fetched'];
