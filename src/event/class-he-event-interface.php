@@ -55,7 +55,9 @@ class EventInterface {
     public function get_events() {
 
         $options = $this->get_user_options();
-        $params = new LinkedEventsParams( $this->create_keyword_object(), $options );
+        $keywords = $this->get_keyword_params();
+
+        $params = new LinkedEventsParams( $keywords, $options );
 
         $events = array();
 
@@ -116,11 +118,11 @@ class EventInterface {
 
 
     /**
-     * Get user keywords
+     * Get keyword URL params 
      * 
-     * @return LinkedEventsKeywords $keywords
+     * @return array $params
      */
-    private function create_keyword_object() {
+    private function get_keyword_params() {
 
         $categories         = get_option( 'hki_events_categories' );
         $demographic_groups = get_option( 'hki_events_demographic_groups' );
@@ -130,7 +132,9 @@ class EventInterface {
         $keywords->set_keywords( $categories );
         $keywords->set_ignored_keywords( $demographic_groups );
 
-        return $keywords;
+        $params = $keywords->get_params();
+
+        return $params;
 
     }
 

@@ -57,9 +57,9 @@ class LinkedEventsParams {
     private $last_modified_since;
 
     /**
-     * Keywords object
+     * Keyword params
      * 
-     * @var LinkedEventsKeywords
+     * @var array
      */
     private $keywords;
 
@@ -68,7 +68,7 @@ class LinkedEventsParams {
      * LinkedEventsParams constructor.
      *
      */
-    function __construct( LinkedEventsKeywords $keywords, $options = array() ) {
+    function __construct( $keywords, $options = array() ) {
 
         $dt = new \DateTime( 'now', new \DateTimeZone( 'Europe/Helsinki' ) );
         $time = $dt->getTimestamp();
@@ -115,8 +115,9 @@ class LinkedEventsParams {
         if ( ! empty ( $this->last_modified_since ) ) {
             $params['last_modified_since'] = $this->last_modified_since;
         }
-
-        $params = array_merge( $params, $this->keywords->get_params() );
+        if ( ! empty ( $this->keywords ) ) {
+            $params = array_merge( $params, $this->keywords );
+        }
 
         return $params;
 
