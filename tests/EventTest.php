@@ -6,7 +6,7 @@ use HkiEvents\Event\Event;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers HkiEvents\Event
+ * @covers HkiEvents\Event\Event
  */
 class EventTest extends TestCase {
 

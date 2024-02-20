@@ -126,12 +126,17 @@ class EventInterface {
 
         $categories         = get_option( 'hki_events_categories' );
         $demographic_groups = get_option( 'hki_events_demographic_groups' );
+        $keywords_groups    = array();
 
-        $keywords = new LinkedEventsKeywords();
+        if ( ! file_exists( HE_DIR . '/inc/keyword-groups.json' ) ) {
+            $keywords_json = file_get_contents( HE_DIR . '/inc/keyword-groups.json' ); 
+            $keywords_groups = json_decode( $keywords_json, true ); 
+        }
+
+        $keywords = new LinkedEventsKeywords( $keywords_groups );
 
         $keywords->set_keywords( $categories );
         $keywords->set_ignored_keywords( $demographic_groups );
-
         $params = $keywords->get_params();
 
         return $params;

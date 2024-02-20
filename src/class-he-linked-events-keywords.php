@@ -4,8 +4,6 @@ namespace HkiEvents;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-use HkiEvents\Utils;
-
 /**
  * LinkedEventsKeywords class.
  *
@@ -18,58 +16,77 @@ class LinkedEventsKeywords {
      *
      * @var string[]
      */
-    private $keywords = array();
+    private array $keywords = array();
 
     /**
      * Ignored Linked Events keywords
      *
      * @var string[]
      */
-    private $keywords_to_ignore = array();
+    private array $keywords_to_ignore = array();
 
     /**
      * Manually defined set of keyword groups
      *
      * @var array
      */
-    private $keyword_groups;
+    private array $keyword_groups;
 
     /**
      * LinkedEventsKeywords constructor.
      *
      */
-    function __construct() {
-        $this->keyword_groups = $this->load_keyword_groups();
+    function __construct( $keywords_groups ) {
+        $this->keyword_groups = $keywords_groups;
     }
 
     /**
      * Set keyword ids
+     * 
+     * @param array $selected
+     * 
+     * @return $this
      */
-    public function set_keywords( $selected ) {
+    public function set_keywords( array $selected ) {
 
-        if ( empty ( $selected ) ) {
-            return;
+        if ( ! empty ( $selected ) ) {
+
+            $groups = $this->get_selected_keyword_groups( $selected );
+            $keyword_ids = $this->keyword_groups_to_ids( $groups );
+    
+            $this->keywords = $keyword_ids;
+
         }
 
-        $groups = $this->get_selected_keyword_groups( $selected );
-        $keyword_ids = $this->keyword_groups_to_ids( $groups );
-
-        $this->keywords = array_merge( $this->keywords, $keyword_ids );
+        return $this;
 
     }
 
     /**
      * Set ignored keyword ids
+     * 
+     * @param array $selected
+     * 
+     * @return $this
      */
-    public function set_ignored_keywords( $selected ) {
+    public function set_ignored_keywords( array $selected ) {
 
         $groups = $this->get_ignored_keyword_groups( $selected );
         $keyword_ids = $this->keyword_groups_to_ids( $groups );
         
-        $this->keywords_to_ignore = array_merge( $this->keywords_to_ignore, $keyword_ids );
+        $this->keywords_to_ignore = $keyword_ids;
+
+        return $this;
 
     }
 
+    public function get_keywords() {
+        return $this->keywords;
+    }
+
+    public function get_ignored_keywords() {
+        return $this->keywords_to_ignore;
+    }
 
     /**
      * Get keywords as Linked Events API params
@@ -97,7 +114,7 @@ class LinkedEventsKeywords {
      * 
      * @return array $keywords
      */
-    private function merge_groups( $groups ) {
+    private function merge_groups( array $groups ) {
 
         $keywords = array();
 
@@ -110,34 +127,13 @@ class LinkedEventsKeywords {
     }
 
     /**
-     * Load keyword groups from JSON file
-     *
-     * @return array|false Decoded keyword data or false
-     * 
-     * TODO: Some error handling
-     * 
-     */
-    private function load_keyword_groups() {
-
-        if ( ! file_exists( HE_DIR . '/inc/keyword-groups.json' ) ) {
-            return false;
-        }
-
-        $keywords_json = file_get_contents( HE_DIR . '/inc/keyword-groups.json' ); 
-        $keywords_groups = json_decode( $keywords_json, true ); 
-
-        return $keywords_groups;
-
-    }
-
-    /**
      * Get user-selected keyword groups
      * 
      * @param array $selected
      * 
      * @return array $groups
      */
-    private function get_selected_keyword_groups( $selected ) {
+    private function get_selected_keyword_groups( array $selected ) {
 
         $selected_keys = array_keys( $selected );
 
@@ -156,7 +152,7 @@ class LinkedEventsKeywords {
      * 
      * @return array $groups
      */
-    private function get_ignored_keyword_groups( $selected ) {
+    private function get_ignored_keyword_groups( array $selected ) {
 
         $selected_keys = ! empty( $selected ) ? array_keys( $selected ) : array();
 
@@ -175,7 +171,7 @@ class LinkedEventsKeywords {
      * 
      * @return string[] $keyword_ids
      */
-    private function keyword_groups_to_ids( $groups ) {
+    private function keyword_groups_to_ids( array $groups ) {
 
         $keywords = $this->merge_groups( $groups );
         $keyword_ids = $this->to_ids( $keywords );
@@ -188,7 +184,7 @@ class LinkedEventsKeywords {
      * Map keywords to array of keyword ids
      *
      */
-    private function to_ids( $keywords ) {
+    private function to_ids( array $keywords ) {
 
         $keywords = array_map(
             function( $v ) { return $v['id']; },
