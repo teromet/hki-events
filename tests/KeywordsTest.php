@@ -2,13 +2,13 @@
 
 namespace HkiEvents;
 
-use HkiEvents\LinkedEventsKeywords;
+use HkiEvents\Keywords;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers HkiEvents\LinkedEventsKeywords
+ * @covers HkiEvents\Keywords
  */
-class LinkedEventsKeywordsTest extends TestCase {
+class KeywordsTest extends TestCase {
 
     public $categories;
     public $demographic_groups;
@@ -97,7 +97,7 @@ class LinkedEventsKeywordsTest extends TestCase {
 
     public function test_keywordsAreSetCorrectly() {
 
-        $keywords_obj = new LinkedEventsKeywords( $this->keyword_groups );
+        $keywords_obj = new Keywords( $this->keyword_groups );
 
         $keywords_obj->set_keywords( $this->categories );
         $keywords = $keywords_obj->get_keywords();
@@ -122,7 +122,7 @@ class LinkedEventsKeywordsTest extends TestCase {
 
     public function test_emptyCategoriesResultInEmptyArray() {
 
-        $keywords = new LinkedEventsKeywords( $this->keyword_groups );
+        $keywords = new Keywords( $this->keyword_groups );
         $keywords->set_keywords( array() );
         $keywords = $keywords->get_keywords();
 
@@ -137,7 +137,7 @@ class LinkedEventsKeywordsTest extends TestCase {
             'cat2' => 'Cat 2'
         );
 
-        $keywords = new LinkedEventsKeywords( $this->keyword_groups );
+        $keywords = new Keywords( $this->keyword_groups );
         $keywords->set_keywords( $categories );
         $keywords = $keywords->get_keywords();
 
@@ -147,7 +147,7 @@ class LinkedEventsKeywordsTest extends TestCase {
 
     public function test_ignoredKeywordsAreSetCorrectly() {
 
-        $keywords_obj = new LinkedEventsKeywords( $this->keyword_groups );
+        $keywords_obj = new Keywords( $this->keyword_groups );
 
         $keywords_obj->set_ignored_keywords( $this->demographic_groups );
         $keywords = $keywords_obj->get_ignored_keywords();

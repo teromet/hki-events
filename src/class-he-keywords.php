@@ -5,23 +5,21 @@ namespace HkiEvents;
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
- * LinkedEventsKeywords class.
+ * Keywords class.
  *
  * 
  */
-class LinkedEventsKeywords {
+class Keywords {
 
     /**
      * Selected Linked Events keywords
      *
-     * @var string[]
      */
     private array $keywords = array();
 
     /**
      * Ignored Linked Events keywords
      *
-     * @var string[]
      */
     private array $keywords_to_ignore = array();
 
@@ -33,7 +31,7 @@ class LinkedEventsKeywords {
     private array $keyword_groups;
 
     /**
-     * LinkedEventsKeywords constructor.
+     * Keywords constructor.
      *
      */
     function __construct( $keywords_groups ) {
@@ -47,7 +45,7 @@ class LinkedEventsKeywords {
      * 
      * @return $this
      */
-    public function set_keywords( array $selected ) {
+    public function set_keywords( array|string $selected ) {
 
         if ( ! empty ( $selected ) ) {
 
@@ -69,7 +67,7 @@ class LinkedEventsKeywords {
      * 
      * @return $this
      */
-    public function set_ignored_keywords( array $selected ) {
+    public function set_ignored_keywords( array|string $selected ) {
 
         $groups = $this->get_ignored_keyword_groups( $selected );
         $keyword_ids = $this->keyword_groups_to_ids( $groups );
@@ -86,25 +84,6 @@ class LinkedEventsKeywords {
 
     public function get_ignored_keywords() {
         return $this->keywords_to_ignore;
-    }
-
-    /**
-     * Get keywords as Linked Events API params
-     */
-    public function get_params() {
-
-        $params = array();
-
-        if ( ! empty ( $this->keywords ) ) {
-            $params['keyword'] = implode( ",", $this->keywords );
-        }
-
-        if ( ! empty ( $this->keywords_to_ignore ) ) {
-            $params['keyword!'] = implode( ",", $this->keywords_to_ignore );
-        }
-
-        return $params;
-
     }
 
     /**
@@ -152,7 +131,7 @@ class LinkedEventsKeywords {
      * 
      * @return array $groups
      */
-    private function get_ignored_keyword_groups( array $selected ) {
+    private function get_ignored_keyword_groups( array|string $selected ) {
 
         $selected_keys = ! empty( $selected ) ? array_keys( $selected ) : array();
 

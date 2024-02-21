@@ -6,7 +6,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 use HkiEvents\CPT;
 use HkiEvents\Event\EventController;
-use HkiEvents\Utils;
 use HkiEvents\Admin\SettingsPage;
 
 /**

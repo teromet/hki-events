@@ -21,10 +21,16 @@ class SettingsPage extends AdminPage {
      */     
     private $sections = array();
 
-    public function after_update() {
-        update_option( 'hki_events_last_fetched', '' );
-    }
+    /**
+     * Constructor
+     */
+    public function __construct() {
 
+        add_action( 'admin_menu', array( $this, 'add_page' ) );
+        add_action( 'admin_init', array( $this, 'register_settings' ) );
+        add_action( 'update_option', array( $this, 'after_update' ), 10, 1 );
+
+    }
 
     protected function get_slug() {
         return 'hki_events_settings';
@@ -60,6 +66,18 @@ class SettingsPage extends AdminPage {
             }
         }
 
+    }
+
+    /**
+     * Empty the value of last_fetched when settings are saved
+     * 
+     * @param string $option
+     */
+    public function after_update( $option ) {
+
+        if ( $option !== 'hki_events_last_fetched' && substr( $option, 0, 11 ) === 'hki_events_' ) {
+            update_option( 'hki_events_last_fetched', '' );
+        }
     }
 
     /**

@@ -4,25 +4,23 @@ namespace HkiEvents\Event;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-use HkiEvents\Event\EventInterface;
-use HkiEvents\Utils;
+use HkiEvents\Api\ApiInterface;
+use HkiEvents\Keywords;
 
 /**
  * EventController class.
  *
- * Acts as an intermediate layer between the Event class and the EventInterface class.
- * 
- * TODO: Move the keyword cache functionality elsewhere
+ * TODO: Refactor the keyword cache functionality etc.
  * 
  */
 class EventController {
 
     /**
-     * EventInterface object
+     * ApiInterface object
      *
-     * @var EventInterface
+     * @var ApiInterface
      */
-    private $event_interface;
+    private $api;
 
     /**
      * Keywords that has been saved to a JSON file
@@ -41,7 +39,7 @@ class EventController {
 
     function __construct( ) {
 
-        $this->event_interface = new EventInterface();
+        $this->api = new ApiInterface();
         $this->keywords = $this->get_keywords_json();
 
     }
@@ -51,7 +49,8 @@ class EventController {
      */
     public function get_events() {
 
-        $events = $this->event_interface->get_events();
+        $options = $this->get_user_options();
+        $events = $this->api->set_options( $options )->get_events();
 
         if ( $events ) {
             
@@ -133,7 +132,7 @@ class EventController {
 
         if ( ! $keyword ) {
 
-            $keyword_api = $this->event_interface->get_keyword( $keyword_id );
+            $keyword_api = $this->api->get_keyword( $keyword_id );
 
             $keyword = array(
                 'id' => $keyword_api->id,
@@ -211,6 +210,48 @@ class EventController {
         $fp = fopen( HE_DIR . '/inc/keywords.json', 'w' );
         fwrite( $fp, $json_string );
         fclose( $fp );
+
+    }
+
+    /**
+     * Get options from db
+     * 
+     * @return array $options 
+     */
+    private function get_user_options() {
+
+        $time_span              = get_option( 'hki_events_time_span' );
+        $free_only              = get_option( 'hki_events_free_only' );
+        $last_fetched           = get_option( 'hki_events_last_fetched' );
+        $categories             = get_option( 'hki_events_categories' );
+        $demographic_groups     = get_option( 'hki_events_demographic_groups' );
+
+        $options = array(
+            'start_time'            => 'today',
+            'time_span'             => $time_span,
+            'last_modified_since'   => $last_fetched,
+            'bool_options'          => array(
+                'hide_recurring_children' => true,
+                'is_free'                 => boolval( $free_only )
+            )
+        );
+
+        if ( file_exists( HE_DIR . '/inc/keyword-groups.json' ) ) {
+
+            $keywords_json = file_get_contents( HE_DIR . '/inc/keyword-groups.json' ); 
+            $keywords_groups = json_decode( $keywords_json, true ); 
+
+            $keywords = new Keywords( $keywords_groups );
+
+            $keywords->set_keywords( $categories );
+            $keywords->set_ignored_keywords( $demographic_groups );
+
+            $options['keywords'] = $keywords->get_keywords();
+            $options['ignored_keywords'] = $keywords->get_ignored_keywords();
+            
+        }
+
+        return $options;
 
     }
 
