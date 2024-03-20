@@ -186,6 +186,7 @@ class Init {
 
         if ( has_shortcode( $post->post_content, HE_SHORTCODE ) )  {
             wp_enqueue_style( 'hki_events_style', HE_URL . '/assets/style.css', array(), '1.0', 'all' );
+            wp_enqueue_script( 'hki_events_script', HE_URL . '/assets/script.js', array() );
         }
 
     }

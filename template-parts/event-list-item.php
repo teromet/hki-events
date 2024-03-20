@@ -1,4 +1,4 @@
-<div class="hki-events-list-item">
+<div class="<?php echo $list_item_class;?>">
 <div class="post-image">
     <?php the_post_thumbnail(); ?>
 </div>

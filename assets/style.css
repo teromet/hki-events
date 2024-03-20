@@ -14,6 +14,9 @@
     position: relative;
     margin-bottom: 1rem;
 }
+.hki-events-list-item.hidden {
+    display: none;
+}
 .hki-events-list-item .post-content {
     position: absolute;
     top: 0;
@@ -35,7 +38,7 @@
     font-size: 1rem;
 }
 .hki-events-list-item .post-title {
-    font-size: 1.5rem;
+    font-size: clamp(1rem, 1vw + 0.75rem, 1.25rem);
 }
 .hki-events-list-item .post-button a {
     background: #fff;
@@ -60,15 +63,45 @@
     height: 100%;
     object-fit: cover;
 }
-@media only screen and (max-width: 1100px) {
+.hki-events-list-filters {
+    max-width: 100% !important;
+}
+.hki-events-list-filters-item {
+    border: 2px solid #000;
+    padding: 0.5rem 1rem;
+    text-transform: uppercase;
+    font-weight: 500;
+    font-size: 0.75rem;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+    margin-right: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+}
+.hki-events-list-filters-item.selected {
+    background: #03e8fc;
+}
+@media only screen and (max-width: 1365px) {
     .hki-events-list-item {
-    flex-basis: calc((100% - 1rem) / 2);
-    margin-bottom: 1rem;
+        flex-basis: calc((100% - 1rem) / 2);
+        margin-bottom: 1rem;
+    }
+}
+@media only screen and (max-width: 768px) {
+    .hki-events-list-item {
+        flex-basis: 100%;
+        margin-bottom: 1rem;
+        min-height: 50vw;
+    }
+    .hki-events-list-filters > span:nth-child(n + 21) {
+        display: none;
     }
 }
 @media only screen and (max-width: 600px) {
-    .hki-events-list-item {
-    flex-basis: 100%;
-    margin-bottom: 1rem;
+    .hki-events-list-filters-item {
+        font-size: 10px;
+    }
+    .hki-events-list-item .post-button a {
+        font-size: 0.75rem;
     }
 }
