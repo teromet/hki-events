@@ -1,9 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Playpen+Sans:wght@100..800&display=swap');
+
+body {
+    background: #e98080;
+    overflow-y: scroll;
+    font-family: "Playpen Sans", cursive;
+}
+h1.wp-block-post-title {
+    font-family: "Playpen Sans", cursive;
+    font-optical-sizing: auto;
+    font-weight: 800;
+    font-style: normal;
+    text-align: center;
+}
+.wp-block-site-title {
+    display: none;
+}
+.wp-block-post-date,
+.wp-block-separator
+{
+    display: none;
+}
+.wp-block-navigation.items-justified-right {
+    --navigation-layout-justification-setting: flex-start;
+    --navigation-layout-justify: flex-start;
+}
+#hki-events-shortcode {
+    width: 100%;
+    max-width: 100% !important;
+    margin-bottom: 4rem;
+}
 .hki-events-list {
     width: 100%;
     max-width: 100% !important;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
+    font-family: "Playpen Sans", cursive;
 }
 .hki-events-list:after {
     flex: 0 0 calc((100% - 2rem) / 3);
@@ -38,22 +70,31 @@
     font-size: 1rem;
 }
 .hki-events-list-item .post-title {
-    font-size: clamp(1rem, 1vw + 0.75rem, 1.25rem);
+    font-size: clamp(1rem, 1vw + 0.75rem, 1.15rem);
 }
 .hki-events-list-item .post-button a {
     background: #fff;
     font-size: 1rem;
     padding: 0.75rem 2rem;
     text-decoration: none;
+    line-height: normal;
     margin-top: 4rem;
     display: inline-block;
+    transition: background-color 0.5s ease;
+    user-select: none;
 }
+.hki-events-list-item .post-button a:hover,
+.hki-events-list-loadmore button:hover
+{
+    background-color: #FFFF00;
+}
+
 .hki-events-list-item .post-overlay {
     height: 100%;
     width: 100%;
     position: absolute;
     top: 0;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.5);
 }
 .hki-events-list-item .post-image {
     height: 100%;
@@ -65,9 +106,11 @@
 }
 .hki-events-list-filters {
     max-width: 100% !important;
+    font-family: "Playpen Sans", cursive;
+    margin-bottom: 2rem;
 }
 .hki-events-list-filters-item {
-    border: 2px solid #000;
+    border: 1px solid #000;
     padding: 0.5rem 1rem;
     text-transform: uppercase;
     font-weight: 500;
@@ -78,30 +121,250 @@
     cursor: pointer;
     user-select: none;
 }
+.hki-events-list-filters-item:hover {
+    text-decoration: underline;
+}
 .hki-events-list-filters-item.selected {
     background: #03e8fc;
+}
+.hki-events-list-loadmore {
+    text-align: center;
+    max-width: 100% !important;
+}
+.list-buttons {
+    margin: 4rem auto 0 auto;
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+.hki-events-list-loadmore button {
+    background: #fff;
+    font-size: 1rem;
+    font-family: "Playpen Sans", cursive;
+    font-weight: 500;
+    padding: 0.75rem 2rem;
+    text-decoration: none;
+    display: inline-block;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.5s ease;
+    user-select: none;
+}
+.loader-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 6rem 0;
+    min-height: 10px;
+}
+.loader {
+    color: #FFFF00;
+    font-size: 10px;
+    width: 1em;
+    height: 1em;
+    border-radius: 50%;
+    position: relative;
+    text-indent: -9999em;
+    animation: mulShdSpin 1.3s infinite linear;
+    transform: translateZ(0);
+  }
+  
+@keyframes mulShdSpin {
+    0%,
+    100% {
+      box-shadow: 0 -3em 0 0.2em, 
+      2em -2em 0 0em, 3em 0 0 -1em, 
+      2em 2em 0 -1em, 0 3em 0 -1em, 
+      -2em 2em 0 -1em, -3em 0 0 -1em, 
+      -2em -2em 0 0;
+    }
+    12.5% {
+      box-shadow: 0 -3em 0 0, 2em -2em 0 0.2em, 
+      3em 0 0 0, 2em 2em 0 -1em, 0 3em 0 -1em, 
+      -2em 2em 0 -1em, -3em 0 0 -1em, 
+      -2em -2em 0 -1em;
+    }
+    25% {
+      box-shadow: 0 -3em 0 -0.5em, 
+      2em -2em 0 0, 3em 0 0 0.2em, 
+      2em 2em 0 0, 0 3em 0 -1em, 
+      -2em 2em 0 -1em, -3em 0 0 -1em, 
+      -2em -2em 0 -1em;
+    }
+    37.5% {
+      box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em,
+       3em 0em 0 0, 2em 2em 0 0.2em, 0 3em 0 0em, 
+       -2em 2em 0 -1em, -3em 0em 0 -1em, -2em -2em 0 -1em;
+    }
+    50% {
+      box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em,
+       3em 0 0 -1em, 2em 2em 0 0em, 0 3em 0 0.2em, 
+       -2em 2em 0 0, -3em 0em 0 -1em, -2em -2em 0 -1em;
+    }
+    62.5% {
+      box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em,
+       3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 0, 
+       -2em 2em 0 0.2em, -3em 0 0 0, -2em -2em 0 -1em;
+    }
+    75% {
+      box-shadow: 0em -3em 0 -1em, 2em -2em 0 -1em, 
+      3em 0em 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, 
+      -2em 2em 0 0, -3em 0em 0 0.2em, -2em -2em 0 0;
+    }
+    87.5% {
+      box-shadow: 0em -3em 0 0, 2em -2em 0 -1em, 
+      3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, 
+      -2em 2em 0 0, -3em 0em 0 0, -2em -2em 0 0.2em;
+    }
+}
+@keyframes floating {
+    0% { transform: translate(0,  0px); }
+    50%  { transform: translate(0, 15px); }
+    100%   { transform: translate(0, -0px); }    
+}
+body.search .hki-events-footer,
+body.error404 .hki-events-footer
+{
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+.hki-events-footer .footer-wave {
+    height: 25vh;
+    position: relative;
+}
+.hki-events-footer .footer-sun {
+    position: fixed;
+    top: -200px;
+    right: -200px;
+    height: 400px;
+    width: 400px;
+    background: #FFFF00;
+    border-radius: 200px;
+    z-index: -1;
+}
+.hki-events-footer .footer-cloud {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    animation-name: floating;
+    animation-duration: 3s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+}
+
+.hki-events-footer .footer-bg {
+    height: 100px;
+    background-color: #0f13fa;
+}
+.hki-events-footer .footer-wave svg {
+    bottom: -5px;
+    position: absolute;
+    pointer-events: none;
+}
+footer.wp-block-template-part {
+    display: none;
+}
+@media only screen and (min-width: 1366px) {
+    .hki-events-footer .footer-cloud {
+        left: 2rem;
+    }
 }
 @media only screen and (max-width: 1365px) {
     .hki-events-list-item {
         flex-basis: calc((100% - 1rem) / 2);
         margin-bottom: 1rem;
     }
+    .hki-events-footer .footer-cloud svg {
+        transform: scale(0.75) translateX(-5rem);
+    }
 }
-@media only screen and (max-width: 768px) {
+@media only screen and (max-width: 900px) {
     .hki-events-list-item {
         flex-basis: 100%;
         margin-bottom: 1rem;
-        min-height: 50vw;
+        min-height: 65vw;
     }
-    .hki-events-list-filters > span:nth-child(n + 21) {
+}
+@media only screen and (min-width: 769px) {
+    #back-to-top-btn {
+        right: 0;
+        position: absolute;
+    }
+}
+@media only screen and (max-width: 768px) {
+    .hki-events-list {
+        margin-bottom: 3rem;
+    }
+    .hki-events-list-item .post-button a {
+        margin-top: 2rem;
+    }
+    .hki-events-list-filters > span:nth-child(n + 16) {
         display: none;
+    }
+    .loader-wrapper {
+        margin: 0;
+    }
+    .list-buttons {
+        flex-flow: column;
+        margin: 4rem 0 0 0;
+    }
+    .list-buttons button {
+        margin-left: 0;
+    }
+    #back-to-top-btn {
+        display: block !important;
+    }
+    .hki-events-list-loadmore .list-buttons > button:first-child {
+        margin-bottom: 6rem;
     }
 }
 @media only screen and (max-width: 600px) {
+    h1.wp-block-post-title {
+        font-size: 30px;
+    }
+    .entry-content p {
+        font-size: 16px !important;
+    }
+    .wp-site-blocks {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+    .entry-content.wp-block-post-content {
+        padding-left: 0rem;
+        padding-right: 0rem;
+    }
+    .entry-content > .wp-block-group {
+        padding: 0;
+    }
+    #hki-events-shortcode {
+        margin-bottom: 0rem;
+    }
     .hki-events-list-filters-item {
         font-size: 10px;
     }
-    .hki-events-list-item .post-button a {
+    .hki-events-list-item .post-content-wrapper {
+        padding: 0 1rem;
+    }
+    .hki-events-list-item .post-button a,
+    .list-buttons button
+    {
         font-size: 0.75rem;
+    }
+    .loader {
+        font-size: 7px;
+    }
+    .hki-events-footer .footer-wave {
+        height: 100px;
+    }
+    .hki-events-footer .footer-sun {
+        top: -100px;
+        right: -100px;
+        height: 200px;
+        width: 200px;
+        border-radius: 100px;
+    }
+    .hki-events-footer .footer-cloud svg {
+        transform: scale(0.5) translateX(-15rem) translateY(-5rem);
     }
 }

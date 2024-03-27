@@ -1,4 +1,4 @@
-<div class="<?php echo $list_item_class;?>">
+<div class="hki-events-list-item" id="<?php echo 'hki-events-list-item-'.$post_index; ?>">
 <div class="post-image">
     <?php the_post_thumbnail(); ?>
 </div>

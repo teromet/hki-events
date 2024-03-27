@@ -74,6 +74,7 @@ class CPT {
             'exclude_from_search'   => true,
             'show_ui'               => true,
             'show_in_menu'          => $this->show_in_menu,
+            'show_in_rest'          => true,
             'menu_icon'             => $this->show_in_menu ? $this->menu_icon : null,
             'taxonomies'            => $this->taxonomies,
             'query_var'             => true,

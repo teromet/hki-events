@@ -1,1 +1,1 @@
-<div class="hki-events-list-filters"><?php he_tag_filters();?></div>
+<div class="hki-events-list-filters"><?php he_tag_filters( $found_posts );?></div>
