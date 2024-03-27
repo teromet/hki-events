@@ -134,10 +134,31 @@ class EventTest extends TestCase {
 
     }
 
-    public function test_add_end_time_incorrectDateIsIgnored() {
+    public function test_add_end_time_startTimeIsUsedIfEndTimeIsEmpty() {
 
         $event = $this->event;
-        $event->name->fi = 'Test event 2';
+        $event->name->fi = 'Test event 3';
+        $event->end_time = '';
+        $start_time = $this->event->start_time;
+
+        $event = new Event( $event );
+        $post_id = $event->save();
+        $this->post_ids[] = $post_id;
+
+        $end_time_saved = get_post_meta( $this->post_id, 'hki_event_end_time', true );
+        
+        $e_date1 = new \DateTime( $start_time );
+        $e_date2 = new \DateTime( $end_time_saved );
+        
+        $this->assertEquals( $e_date1, $e_date2 );
+
+    }
+
+    public function test_add_end_time_incorrectDatesAreIgnored() {
+
+        $event = $this->event;
+        $event->name->fi = 'Test event 4';
+        $event->start_time = '2024-01-11T17:00:0jjh0Z2023-01-02';
         $event->end_time = '2024-01-11T17:00:00Z2023-01-02';
 
         $event = new Event( $event );

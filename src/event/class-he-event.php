@@ -86,17 +86,19 @@ class Event {
      */
     private readonly string $image_alt_text;
 
+    const IMAGE_FALLBACK = 'https://i.imgur.com/XBaFPUf.png';
+
 
     function __construct( \stdClass $event, $keywords = array() ) {
 
         $this->id               = $event->id;
         $this->name             = $event->name->fi ? $event->name->fi : $event->name->en;
         $this->start_time       = strtotime( $event->start_time ) ? $event->start_time : '';
-        $this->end_time         = strtotime( $event->end_time ) ? $event->end_time : '';
+        $this->end_time         = strtotime( $event->end_time ) ? $event->end_time : $this->start_time;
         $this->description      = $event->description->fi;
         $this->recurring        = $event->super_event_type === 'recurring' ? true : false;
         $this->keywords         = $keywords;
-        $this->image_url        = ! empty( $event->images ) && ! empty( $event->images[0]->url ) ?  $event->images[0]->url : '';
+        $this->image_url        = ! empty( $event->images ) && ! empty( $event->images[0]->url ) ?  $event->images[0]->url : self::IMAGE_FALLBACK;
         $this->image_alt_text   = ! empty( $event->images ) && ! empty( $event->images[0]->alt_text ) ?  $event->images[0]->alt_text : '';
 
     }
