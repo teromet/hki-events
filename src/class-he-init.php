@@ -125,6 +125,7 @@ class Init {
                 'schema'            => null,
             )
         );
+
         register_rest_field( HE_POST_TYPE,
             'hki_event_image_alt_text',
             array(
@@ -133,8 +134,18 @@ class Init {
                 'schema'            => null,
             )
         );
+
         register_rest_field( HE_POST_TYPE,
             'hki_event_start_time',
+            array(
+                'get_callback'      => array( $this, 'post_meta_callback' ),
+                'update_callback'   => null,
+                'schema'            => null,
+            )
+        );
+
+        register_rest_field( HE_POST_TYPE,
+        'hki_event_end_time',
             array(
                 'get_callback'      => array( $this, 'post_meta_callback' ),
                 'update_callback'   => null,

@@ -11,7 +11,7 @@ $start              = date( 'j.n.Y', strtotime( $start_date ) );
 $end                = date( 'j.n.Y', strtotime( $end_date ) );
 $terms              = get_the_terms( $post_id, HE_TAXONOMY );
 
-if( strtotime( $start_date ) < strtotime( $end_date ) ) {
+if( $start != $end ) {
     $start = $start.' - '.$end;
 }
 

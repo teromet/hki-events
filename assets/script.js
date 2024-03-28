@@ -102,6 +102,12 @@ document.addEventListener("DOMContentLoaded", function(event) {
         const currentCount  = document.querySelectorAll('.hki-events-list-item').length;
         let thumbnail       = item.hki_event_image_url ? `<img src="${item.hki_event_image_url}" alt="${item.hki_event_image_alt_text}" onerror="this.src='${fallBackImg}'" loading="lazy"></img>` : fallBackImg;
         let itemId          = `hki-events-list-item-${currentCount + index}`;
+        let startTime       = new Date(Date.parse(item.hki_event_start_time)).toLocaleDateString('fi');
+        let endTime         = new Date(Date.parse(item.hki_event_end_time)).toLocaleDateString('fi');
+
+        if ( startTime != endTime ) {
+            startTime = startTime + ' - ' + endTime;
+        }
 
         let listItem =
         `<div class="hki-events-list-item" id="${itemId }" style="opacity:0;">
@@ -110,7 +116,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
             </div>
             <div class="post-content">
                 <div class="post-content-wrapper">
-                    <div class="post-date">${new Date(Date.parse(item.hki_event_start_time)).toLocaleDateString('fi')}</div>
+                    <div class="post-date">${startTime}</div>
                     <div class="post-title">${item.title.rendered}</div>
                     <div class="post-button">
                         <a class="btn btn-news btn-primary" href="${item.link}">
