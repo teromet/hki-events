@@ -113,10 +113,13 @@ class ApiOptions {
         if ( ! empty ( $this->ignored_keywords ) ) {
             $params['keyword!'] = implode( ",", $this->ignored_keywords );
         }
-        // Last modified
+        /* Last modified
+         * TODO: Use only when querying updates of existing events
+         * 
         if ( ! empty ( $this->ignored_keywords ) ) {
             $params['last_modified_since'] = $this->last_modified_since;
         }
+        */
         // Paging
         $params['page'] = 1;
 
