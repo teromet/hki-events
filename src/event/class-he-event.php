@@ -292,19 +292,19 @@ class Event {
         $query_args = array(
             'post_type'  => HE_POST_TYPE,
             'posts_per_page' => 1,
+            'fields' => 'ids',
             'meta_query' => array(
-                'relation' => 'AND',
                 array(
                     'key'   => 'hki_event_linked_events_id',
                     'value' => $this->id
                 )
-            ),
+            )
         );
 
         $posts = get_posts( $query_args );
 
-        if( ! empty ( $posts ) &&  $posts[0]->post_title == $this->name ) {
-            return $posts[0]->ID;
+        if( ! empty ( $posts ) ) {
+            return $posts[0];
         }
 
         return false;

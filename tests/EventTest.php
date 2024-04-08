@@ -83,6 +83,33 @@ class EventTest extends TestCase {
         $this->assertEquals( $this->event->description->fi, get_post( $this->post_id )->post_content );
     }
 
+    public function test_save_postIdIsReturnedIfLinkedEventsIdExists() {
+
+        $duplicate_event = $this->event;
+        $duplicate_event->name->fi = 'Duplicate event';
+
+        $duplicate_event = new Event( $duplicate_event, $this->keywords );
+        $post_id = $duplicate_event->save();
+        $this->post_ids[] = $post_id;
+
+        $this->assertEquals( $this->post_id, $post_id );
+
+    }
+
+    public function test_save_newPostIsCreatedIfLinkedEventsIdDoesntExist() {
+
+        $new_event = $this->event;
+        $new_event->name->fi = 'Duplicate event';
+        $new_event->id = 'test:0354';
+
+        $new_event = new Event( $new_event, $this->keywords );
+        $post_id = $new_event->save();
+        $this->post_ids[] = $post_id;
+
+        $this->assertNotEquals( $this->post_id, $post_id );
+
+    }
+
     public function test_add_id_idIsAddedCorrectly() {
 
         $id = $this->event->id;
@@ -108,6 +135,7 @@ class EventTest extends TestCase {
     public function test_add_start_time_incorrectDateIsIgnored() {
 
         $event = $this->event;
+        $event->id = 'test:0355';
         $event->name->fi = 'Test event 2';
         $event->start_time = '2024-fooo01-11T17:00:00Z';
 
@@ -137,6 +165,7 @@ class EventTest extends TestCase {
     public function test_add_end_time_startTimeIsUsedIfEndTimeIsEmpty() {
 
         $event = $this->event;
+        $event->id = 'test:0356';
         $event->name->fi = 'Test event 3';
         $event->end_time = '';
         $start_time = $this->event->start_time;
@@ -157,6 +186,7 @@ class EventTest extends TestCase {
     public function test_add_end_time_incorrectDatesAreIgnored() {
 
         $event = $this->event;
+        $event->id = 'test:0357';
         $event->name->fi = 'Test event 4';
         $event->start_time = '2024-01-11T17:00:0jjh0Z2023-01-02';
         $event->end_time = '2024-01-11T17:00:00Z2023-01-02';
@@ -189,6 +219,7 @@ class EventTest extends TestCase {
     public function test_add_tags_incorrectKeywordDataIsIgnored() {
 
         $event = $this->event;
+        $event->id = 'test:0358';
         $event->name->fi = 'Test event 4';
 
         $keywords = array(
